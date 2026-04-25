@@ -1,0 +1,275 @@
+/* =============================================
+   JumpOrDie — style.css
+   Reset + layout de base
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg:        #1a1a2e;
+  --color-panel:     #16213e;
+  --color-border:    #0f3460;
+  --color-accent:    #e94560;
+  --color-green:     #27ae60;
+  --color-gold:      #f1c40f;
+  --color-text:      #eaeaea;
+  --color-text-muted:#8a8a9a;
+
+  --panel-width:     220px;
+  --topbar-height:   48px;
+  --canvas-width:    800px;
+  --canvas-height:   400px;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── Layout principal ── */
+#app {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  padding-top: var(--topbar-height);
+}
+
+/* ── Canvas container ── */
+#canvas-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#canvas-container canvas {
+  display: block;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+}
+
+/* ── Panels latéraux ── */
+.ui-panel {
+  width: var(--panel-width);
+  height: var(--canvas-height);
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 10px;
+  flex-shrink: 0;
+}
+
+#ui-left  { margin-right: 8px; }
+#ui-right { margin-left: 8px; }
+
+/* ── Scrollbar custom ── */
+.ui-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.ui-panel::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+.ui-panel::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* ── Éléments UI communs ── */
+.panel-section {
+  margin-bottom: 14px;
+}
+
+.panel-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-text);
+}
+
+.slider-label span:last-child {
+  color: var(--color-gold);
+  font-weight: bold;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: var(--color-border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+select {
+  width: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  outline: none;
+}
+
+.btn {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  margin-bottom: 4px;
+}
+
+.btn:hover {
+  background: var(--color-border);
+}
+
+.btn.primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  font-weight: bold;
+}
+
+.btn.primary:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+.btn.success {
+  background: var(--color-green);
+  border-color: var(--color-green);
+  color: #fff;
+}
+
+.btn.success:hover {
+  background: #219a52;
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 10px 0;
+}
+
+/* ── Badge stats ── */
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.stat-badge.green  { border-color: var(--color-green);  color: var(--color-green); }
+.stat-badge.gold   { border-color: var(--color-gold);   color: var(--color-gold); }
+.stat-badge.red    { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ── Progress bar ── */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-green);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* ── Tab bar ── */
+#tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  padding: 6px 10px 0;
+  z-index: 100;
+}
+
+.tab-btn {
+  padding: 5px 14px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab-btn:hover {
+  color: var(--color-text);
+}
+
+.tab-btn.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpOrDie 🌊</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- p5.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+
+  <!-- Core -->
+  <script src="src/core/GameManager.js"></script>
+  <script src="src/core/Camera.js"></script>
+  <script src="src/core/InputManager.js"></script>
+
+  <!-- Brain -->
+  <script src="src/brain/NeuralNetwork.js"></script>
+  <script src="src/brain/Sensors.js"></script>
+
+  <!-- Agent -->
+  <script src="src/agent/Agent.js"></script>
+  <script src="src/agent/Population.js"></script>
+  <script src="src/agent/GeneticAlgorithm.js"></script>
+
+  <!-- Level -->
+  <script src="src/level/elements/Platform.js"></script>
+  <script src="src/level/elements/Enemy.js"></script>
+  <script src="src/level/elements/Trap.js"></script>
+  <script src="src/level/elements/Coin.js"></script>
+  <script src="src/level/elements/Cherry.js"></script>
+  <script src="src/level/elements/Checkpoint.js"></script>
+  <script src="src/level/TileMap.js"></script>
+  <script src="src/level/LevelGenerator.js"></script>
+  <script src="src/level/Level.js"></script>
+
+  <!-- UI -->
+  <script src="src/ui/HUD.js"></script>
+  <script src="src/ui/UIPanel.js"></script>
+  <script src="src/ui/EditorPanel.js"></script>
+  <script src="src/ui/FitnessChart.js"></script>
+  <script src="src/ui/Podium.js"></script>
+
+  <!-- Competition -->
+  <script src="src/competition/CompetitionManager.js"></script>
+  <script src="src/competition/Leaderboard.js"></script>
+
+  <!-- Storage -->
+  <script src="src/storage/BrainStorage.js"></script>
+  <script src="src/storage/LevelStorage.js"></script>
+
+  <!-- Entry point -->
+  <script src="sketch.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="canvas-container"></div>
+    <div id="ui-left"  class="ui-panel"></div>
+    <div id="ui-right" class="ui-panel"></div>
+  </div>
+</body>
+</html>
