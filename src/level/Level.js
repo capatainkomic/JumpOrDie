@@ -54,14 +54,17 @@ class Level {
           this.gaps.push({ x: el.x, width: el.width });
           break;
 
-        // Ennemis, cerises, checkpoints, finish
-        // seront instanciés dans les features suivantes
         case 'enemy':
+          // instancié Feature suivante
+          this.enemies.push(el);
+          break;
+
         case 'cherry':
+          this.cherries.push(el);
+          break;
+
         case 'checkpoint':
-        case 'finish':
-          // Stockés bruts pour l'instant
-          if (el.type === 'finish') this.finish = el;
+          this.checkpoints.push(el);
           break;
       }
     }
@@ -97,29 +100,30 @@ class Level {
     triangle(x, y - 60, x + 30, y - 45, x, y - 30);
   }
 
-  // ── Retourne toutes les surfaces solides ─────
-  // Utilisé par Agent.js pour les collisions (Feature 3)
+  // ── Retourne les surfaces et gaps ───────────
+  // grounds   → solides sur les 4 côtés
+  // platforms → atterrissage + collision latérale/dessous
+  // gaps      → zones de mort
   getSolidSurfaces() {
-    const surfaces = [];
+    const grounds = this.grounds.map(g => ({
+      left  : g.x,
+      right : g.x + g.width,
+      top   : g.y,
+      bottom: g.y + g.height,
+    }));
 
-    for (const g of this.grounds) {
-      surfaces.push({
-        left  : g.x,
-        right : g.x + g.width,
-        top   : g.y,
-        bottom: g.y + g.height,
-      });
-    }
+    const platforms = this.platforms.map(p => ({
+      left  : p.left,
+      right : p.right,
+      top   : p.top,
+      bottom: p.bottom,
+    }));
 
-    for (const p of this.platforms) {
-      surfaces.push({
-        left  : p.left,
-        right : p.right,
-        top   : p.top,
-        bottom: p.bottom,
-      });
-    }
+    const gaps = this.gaps.map(g => ({
+      x    : g.x,
+      width: g.width,
+    }));
 
-    return surfaces;
+    return { grounds, platforms, gaps };
   }
 }
