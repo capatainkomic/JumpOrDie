@@ -9,14 +9,11 @@
 class TileMap {
 
   constructor() {
-    // Toutes les images sont null jusqu'au preload()
-    this.ground  = null; // tiles du sol (9 tiles)
-    this.platform = null; // tiles des plateformes flottantes
+    this.ground  = null; 
+    this.platform = null; 
   }
 
-  // ── Appelé dans preload() de sketch.js ──────
-  // Charge tous les PNG ground et retourne
-  // les objets tiles prêts à l'emploi
+
   preload() {
     const path = 'assets/ground tileset/';
 

@@ -41,11 +41,11 @@ class GameManager {
       mutationRate        : 0.08,
       generationsPerLevel : 3,
       stopConditionPct    : 0.60,       // 60% des agents
-      stopConditionCheckpoint : 3,      // doivent atteindre le checkpoint 3
+      stopConditionThreshold  : 0.60,
+      checkpointThresholds    : [0.25, 0.50, 0.75],    
       difficulty          : 'medium',   // 'easy' | 'medium' | 'hard' | 'killer'
     };
 
-    console.log('[GameManager] Initialisé — état :', this._state);
   }
 
   // ── Accesseur d'état ─────────────────────────
@@ -61,7 +61,6 @@ class GameManager {
     }
     const previous = this._state;
     this._state = newState;
-    console.log(`[GameManager] Transition : ${previous} → ${newState}`);
     this._notify(newState, previous);
   }
 
@@ -102,7 +101,6 @@ class GameManager {
     // Changer de niveau toutes les K générations
     if ((this.generation - 1) % this.config.generationsPerLevel === 0) {
       this.levelIndex++;
-      console.log(`[GameManager] Nouveau niveau — levelIndex : ${this.levelIndex}`);
     }
   }
 
@@ -112,7 +110,6 @@ class GameManager {
     this.levelIndex  = 1;
     this.bestFitness = 0;
     this.aliveCount  = 0;
-    console.log('[GameManager] Reset complet');
   }
 }
 

@@ -15,16 +15,18 @@ class Level {
     this.length   = data.length;
     this.groundY  = data.groundY;
 
-    // Listes des éléments instanciés
-    this.grounds     = [];  // blocs de sol { x, y, width, height }
-    this.platforms   = [];  // instances Platform
-    this.gaps        = [];  // trous { x, width }
-    this.enemies     = [];  // à remplir Feature 3
-    this.cherries    = [];  // à remplir Feature 3
-    this.checkpoints = [];  // à remplir Feature 3
+    this.grounds     = [];
+    this.platforms   = [];
+    this.gaps        = [];
+    this.enemies     = [];
+    this.cherries    = [];
     this.finish      = null;
 
     this._build(data.elements);
+
+    // Cache des surfaces solides — calculé une fois
+    // à la construction, pas à chaque frame
+    this._surfaces = this._buildSurfaces();
   }
 
   // ── Construit les éléments depuis les données ─
@@ -34,19 +36,14 @@ class Level {
 
         case 'ground':
           this.grounds.push({
-            x     : el.x,
-            y     : el.y,
-            width : el.width,
-            height: el.height,
+            x: el.x, y: el.y,
+            width: el.width, height: el.height,
           });
           break;
 
         case 'platform':
           this.platforms.push(
-            new Platform(
-              el.x, el.y, el.width,
-              this.tileMap.platform
-            )
+            new Platform(el.x, el.y, el.width, this.tileMap.platform)
           );
           break;
 
@@ -54,43 +51,61 @@ class Level {
           this.gaps.push({ x: el.x, width: el.width });
           break;
 
-        case 'enemy':
-          // instancié Feature suivante
-          this.enemies.push(el);
+        case 'eagle':
+          this.enemies.push(new Eagle(el.x, el.y));
+          break;
+
+        case 'opossum':
+          this.enemies.push(new Opossum(el.x, el.y, el.patrolLeft, el.patrolRight));
           break;
 
         case 'cherry':
-          this.cherries.push(el);
+          this.cherries.push(new Cherry(el.x, el.y));
           break;
 
-        case 'checkpoint':
-          this.checkpoints.push(el);
+        case 'finish':
+          this.finish = el;
           break;
       }
     }
   }
 
+  // ── Met à jour les ennemis et les cerises ────
+  // agent : Agent actif, score : { value: Number }
+  update(agent, score) {
+    for (const enemy of this.enemies) {
+      enemy.update(agent);
+    }
+    for (const cherry of this.cherries) {
+      cherry.update(agent, score);
+    }
+
+  }
+
   // ── Rendu complet du niveau ──────────────────
-  // Appelé entre camera.begin() et camera.end()
   draw() {
-    // 1. Sol
     for (const g of this.grounds) {
       this.tileMap.drawGround(g.x, g.y, g.width, g.height);
     }
 
-    // 2. Plateformes flottantes
     for (const p of this.platforms) {
       p.draw();
     }
 
-    // 3. Drapeau de fin (visuel temporaire)
+    for (const cherry of this.cherries) {
+      cherry.draw();
+    }
+
+    for (const enemy of this.enemies) {
+      enemy.draw();
+    }
+
     if (this.finish) {
       this._drawFinishFlag(this.finish.x, this.finish.y);
     }
   }
 
   // ── Drapeau de fin temporaire ────────────────
-  // Sera remplacé par un sprite en mode compétition
   _drawFinishFlag(x, y) {
     stroke(255, 50, 50);
     strokeWeight(3);
@@ -100,28 +115,28 @@ class Level {
     triangle(x, y - 60, x + 30, y - 45, x, y - 30);
   }
 
-  // ── Retourne les surfaces et gaps ───────────
-  // grounds   → solides sur les 4 côtés
-  // platforms → atterrissage + collision latérale/dessous
-  // gaps      → zones de mort
+  // ── Surfaces solides (depuis le cache) ───────
+  // Appelé 60x/seconde — retourne le cache calculé
+  // une seule fois à la construction du niveau
   getSolidSurfaces() {
+    return this._surfaces;
+  }
+
+  // ── Construit le cache des surfaces ──────────
+  // Appelé une seule fois dans le constructor
+  _buildSurfaces() {
     const grounds = this.grounds.map(g => ({
-      left  : g.x,
-      right : g.x + g.width,
-      top   : g.y,
-      bottom: g.y + g.height,
+      left: g.x, right: g.x + g.width,
+      top: g.y,  bottom: g.y + g.height,
     }));
 
     const platforms = this.platforms.map(p => ({
-      left  : p.left,
-      right : p.right,
-      top   : p.top,
-      bottom: p.bottom,
+      left: p.left, right: p.right,
+      top: p.top,   bottom: p.bottom,
     }));
 
     const gaps = this.gaps.map(g => ({
-      x    : g.x,
-      width: g.width,
+      x: g.x, width: g.width,
     }));
 
     return { grounds, platforms, gaps };

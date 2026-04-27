@@ -27,19 +27,35 @@ class Agent {
   static MAX_JUMP_DISTANCE =  85;
 
   constructor(x, y, col) {
-    // Position = centre de l'agent
     this.x = x;
     this.y = y;
     this.col = col;
 
-    this.vx = Agent.MOVE_SPEED; // vitesse horizontale constante
-    this.vy = 0;                // vitesse verticale
+    this.vx = Agent.MOVE_SPEED;
+    this.vy = 0;
 
     this.isOnGround = false;
     this.isDead     = false;
 
+    // Cerveau — assigné par Population en Feature 5
+    // null = agent contrôlé manuellement (test)
+    this.brain = null;
+
     this.fitness           = 0;
+    this._startX           = x;
     this.distanceTravelled = 0;
+  }
+
+  // ── Décision du cerveau ──────────────────────
+  // Appelé avant update() par Population (Feature 5)
+  // inputs : tableau normalisé [0,1] calculé par Sensors
+  decide(inputs) {
+    if (!this.brain) return;
+
+    const output = this.brain.forward(inputs);
+
+    // output[0] > 0.5 → sauter
+    if (output[0] > 0.5) this.jump();
   }
 
 
@@ -71,7 +87,8 @@ class Agent {
       this.isDead = true;
     }
 
-    this.distanceTravelled = this.x;
+    // Distance réelle depuis le point de spawn
+    this.distanceTravelled = this.x - this._startX;
   }
 
   // ── Déplacement horizontal + collisions ──────

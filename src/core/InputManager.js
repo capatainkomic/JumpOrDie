@@ -40,7 +40,6 @@ class InputManager {
   // ── Sélection outil éditeur ──────────────────
   selectEditorElement(type) {
     this.selectedEditorElement = type;
-    console.log('[InputManager] Outil sélectionné :', type);
   }
 
   clearEditorElement() {

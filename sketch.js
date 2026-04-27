@@ -13,17 +13,53 @@ let level;
 let levelGenerator;
 let testAgent;
 
-// ── Mesure physique empirique ─────────────────
-let _jumpStartX = 0;
-let _jumpStartY = 0;
-let _jumpMaxY   = 0;
-let _wasInAir   = false;
-let _measuredH  = 0;
-let _measuredD  = 0;
+// ── Debug physique (temporaire — à supprimer après Feature 4) ──
+const PhysicsDebug = {
+  jumpStartX : 0,
+  jumpStartY : 0,
+  jumpMaxY   : 0,
+  wasInAir   : false,
+  measuredH  : 0,
+  measuredD  : 0,
+
+  onJumpStart(agent) {
+    this.jumpStartX = agent.x;
+    this.jumpStartY = agent.y;
+    this.jumpMaxY   = agent.y;
+  },
+
+  update(agent) {
+    if (!agent.isOnGround && !agent.isDead) {
+      if (agent.y < this.jumpMaxY) this.jumpMaxY = agent.y;
+      this.wasInAir = true;
+    } else if (this.wasInAir && agent.isOnGround) {
+      this.measuredH = this.jumpStartY - this.jumpMaxY;
+      this.measuredD = agent.x - this.jumpStartX;
+      this.wasInAir  = false;
+      console.log(`[physique] H: ${this.measuredH.toFixed(1)}px | D: ${this.measuredD.toFixed(1)}px`);
+    }
+  },
+
+  draw() {
+    fill(255, 255, 255, 180);
+    noStroke();
+    textSize(10);
+    textAlign(LEFT, TOP);
+    text(`Saut hauteur:  ${this.measuredH.toFixed(0)}px`, 8, 50);
+    text(`Saut distance: ${this.measuredD.toFixed(0)}px`, 8, 64);
+  },
+};
+
+let score = { value: 0 };
 
 function preload() {
   tileMap = new TileMap();
   tileMap.preload();
+
+
+  Eagle.preload();
+  Opossum.preload();
+  Cherry.preload();
 }
 
 function setup() {
@@ -71,17 +107,9 @@ function _generateNewLevel() {
 function drawTraining() {
   const surfaces = level.getSolidSurfaces();
 
-  // ── Mesure empirique du saut ─────────────────
-  if (!testAgent.isOnGround && !testAgent.isDead) {
-    if (testAgent.y < _jumpMaxY) _jumpMaxY = testAgent.y;
-    _wasInAir = true;
-  } else if (_wasInAir && testAgent.isOnGround) {
-    _measuredH = _jumpStartY - _jumpMaxY;
-    _measuredD = testAgent.x - _jumpStartX;
-    _wasInAir  = false;
-    console.log(`[physique] Hauteur: ${_measuredH.toFixed(1)}px | Distance: ${_measuredD.toFixed(1)}px`);
-  }
+  PhysicsDebug.update(testAgent);
 
+  level.update(testAgent, score);
   testAgent.update(surfaces);
   camera.update(testAgent);
 
@@ -102,12 +130,11 @@ function drawDebugInfo() {
   noStroke();
   textSize(10);
   textAlign(LEFT, TOP);
-  text(`FPS: ${Math.round(frameRate())}`,          8, 8);
-  text(`État: ${gm.state}`,                        8, 22);
-  text(`Gén: ${gm.generation} | Niv: ${gm.levelIndex}`, 8, 36);
-  text(`Saut hauteur:  ${_measuredH.toFixed(0)}px`, 8, 50);
-  text(`Saut distance: ${_measuredD.toFixed(0)}px`, 8, 64);
-  text(`Agent X: ${testAgent.x.toFixed(1)}px`, 8, 78);
+  text(`FPS: ${Math.round(frameRate())}`,               8, 8);
+  text(`État: ${gm.state}`,                             8, 22);
+  text(`Gén: ${gm.generation} | Niv: ${gm.levelIndex}`,8, 36);
+  text(`Agent X: ${testAgent.x.toFixed(1)}px`,          8, 78);
+  PhysicsDebug.draw();
 }
 
 function mousePressed() {
@@ -120,11 +147,7 @@ function keyPressed() {
   if (key === 'r' || key === 'R') _generateNewLevel();
 
   if (key === ' ') {
-    if (testAgent.isOnGround) {
-      _jumpStartX = testAgent.x;
-      _jumpStartY = testAgent.y;
-      _jumpMaxY   = testAgent.y;
-    }
+    if (testAgent.isOnGround) PhysicsDebug.onJumpStart(testAgent);
     testAgent.jump();
   }
 }
