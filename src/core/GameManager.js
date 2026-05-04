@@ -33,19 +33,26 @@ class GameManager {
 
     // Config entraînement (modifiée par les curseurs UI)
     this.config = {
-      populationSize      : 50,
-      inputCount          : 6,
-      hiddenLayers        : 2,
-      neuronsPerLayer     : 12,
-      activationFn        : 'sigmoid',  // 'sigmoid' | 'relu' | 'tanh'
-      mutationRate        : 0.08,
-      generationsPerLevel : 3,
-      stopConditionPct    : 0.60,       // 60% des agents
-      stopConditionThreshold  : 0.60,
-      checkpointThresholds    : [0.25, 0.50, 0.75],    
-      difficulty          : 'medium',   // 'easy' | 'medium' | 'hard' | 'killer'
+      // Réseau de neurones
+      populationSize         : 50,
+      inputCount             : 20,
+      hiddenLayers           : 2,
+      neuronsPerLayer        : 12,
+      activationFn           : 'sigmoid',
+      mutationRate           : 0.08,
+
+      // Système hybride niveaux
+      generationsPerLevel    : 10,   // gens max sur même niveau
+      levelsBeforeDifficulty : 3,    // niveaux réussis avant difficulté++
+
+      // Condition de réussite d'un niveau
+      stopConditionPct       : 0.60,
+      stopConditionThreshold : 0.60,
+
+      difficulty             : 'easy',
     };
 
+    console.log('[GameManager] Initialisé — état :', this._state);
   }
 
   // ── Accesseur d'état ─────────────────────────
@@ -61,6 +68,7 @@ class GameManager {
     }
     const previous = this._state;
     this._state = newState;
+    console.log(`[GameManager] Transition : ${previous} → ${newState}`);
     this._notify(newState, previous);
   }
 
@@ -98,10 +106,6 @@ class GameManager {
   // ── Nouvelle génération  
   nextGeneration() {
     this.generation++;
-    // Changer de niveau toutes les K générations
-    if ((this.generation - 1) % this.config.generationsPerLevel === 0) {
-      this.levelIndex++;
-    }
   }
 
   // ── Reset complet  
@@ -110,6 +114,7 @@ class GameManager {
     this.levelIndex  = 1;
     this.bestFitness = 0;
     this.aliveCount  = 0;
+    console.log('[GameManager] Reset complet');
   }
 }
 

@@ -1,6 +1,7 @@
 // ==============================================
 // sketch.js
 // Point d'entrée p5.js — setup() + draw()
+// Délègue toute la logique à TrainingManager
 // ==============================================
 
 const CANVAS_W = 800;
@@ -9,18 +10,13 @@ const TILE_SIZE = 16;
 
 let camera;
 let tileMap;
-let level;
 let levelGenerator;
-let testAgent;
+let trainingManager;
 
-// ── Debug physique (temporaire — à supprimer après Feature 4) ──
+// ── Debug physique (temporaire) ───────────────
 const PhysicsDebug = {
-  jumpStartX : 0,
-  jumpStartY : 0,
-  jumpMaxY   : 0,
-  wasInAir   : false,
-  measuredH  : 0,
-  measuredD  : 0,
+  jumpStartX: 0, jumpStartY: 0, jumpMaxY: 0,
+  wasInAir: false, measuredH: 0, measuredD: 0,
 
   onJumpStart(agent) {
     this.jumpStartX = agent.x;
@@ -29,114 +25,92 @@ const PhysicsDebug = {
   },
 
   update(agent) {
-    if (!agent.isOnGround && !agent.isDead) {
+    if (!agent || agent.isDead) return;
+    if (!agent.isOnGround) {
       if (agent.y < this.jumpMaxY) this.jumpMaxY = agent.y;
       this.wasInAir = true;
-    } else if (this.wasInAir && agent.isOnGround) {
+    } else if (this.wasInAir) {
       this.measuredH = this.jumpStartY - this.jumpMaxY;
       this.measuredD = agent.x - this.jumpStartX;
       this.wasInAir  = false;
-      console.log(`[physique] H: ${this.measuredH.toFixed(1)}px | D: ${this.measuredD.toFixed(1)}px`);
     }
   },
 
   draw() {
-    fill(255, 255, 255, 180);
-    noStroke();
-    textSize(10);
-    textAlign(LEFT, TOP);
-    text(`Saut hauteur:  ${this.measuredH.toFixed(0)}px`, 8, 50);
-    text(`Saut distance: ${this.measuredD.toFixed(0)}px`, 8, 64);
+    text(`H: ${this.measuredH.toFixed(0)}px`, 8, 92);
+    text(`D: ${this.measuredD.toFixed(0)}px`, 8, 106);
   },
 };
 
-let score = { value: 0 };
-
+// ── Preload ───────────────────────────────────
 function preload() {
   tileMap = new TileMap();
   tileMap.preload();
-
-
   Eagle.preload();
   Opossum.preload();
   Cherry.preload();
 }
 
+// ── Setup ─────────────────────────────────────
 function setup() {
   const cnv = createCanvas(CANVAS_W, CANVAS_H);
   cnv.parent('canvas-container');
+
   camera         = new Camera(CANVAS_W, CANVAS_H);
   levelGenerator = new LevelGenerator();
-  _generateNewLevel();
+  trainingManager = new TrainingManager(tileMap, levelGenerator);
 
-  // Spawner l'agent sur le sol réel du niveau
-  testAgent = new Agent(
-    3 * TILE_SIZE,
-    level.groundY - Agent.HEIGHT / 2,
-    color(231, 76, 60)
-  );
   frameRate(60);
-  console.log('[sketch] Setup terminé — JumpOrDie 🌊');
+  console.log('[sketch] Setup — JumpOrDie 🌊');
 }
 
+// ── Draw ──────────────────────────────────────
 function draw() {
   background(135, 206, 235);
+
   switch (gm.state) {
-    case GameManager.STATES.TRAINING:    drawTraining();    break;
-    case GameManager.STATES.COMPETITION: drawCompetition(); break;
+    case GameManager.STATES.TRAINING:
+      drawTraining();
+      break;
+    case GameManager.STATES.COMPETITION:
+      drawCompetition();
+      break;
   }
+
   drawDebugInfo();
 }
 
-function _generateNewLevel() {
-  const data = levelGenerator.generate(gm.config.difficulty);
-  level = new Level(tileMap, data);
-  // Respawner l'agent sur le sol du nouveau niveau
-  if (testAgent) {
-    testAgent.x  = 3 * TILE_SIZE;
-    testAgent.y  = level.groundY - Agent.HEIGHT / 2;
-    testAgent.vx = Agent.MOVE_SPEED;
-    testAgent.vy = 0;
-    testAgent.isDead     = false;
-    testAgent.isOnGround = false;
-  }
-  console.log('[sketch] Niveau généré —', gm.config.difficulty,
-    '— éléments :', data.elements.length);
-}
-
+// ── Mode entraînement ─────────────────────────
 function drawTraining() {
-  const surfaces = level.getSolidSurfaces();
-
-  PhysicsDebug.update(testAgent);
-
-  level.update(testAgent, score);
-  testAgent.update(surfaces);
-  camera.update(testAgent);
-
-  camera.begin();
-    level.draw();
-    testAgent.draw();
-  camera.end();
+  trainingManager.update();
+  trainingManager.draw(camera);
+  PhysicsDebug.update(trainingManager.population.bestAgent);
 }
 
+// ── Mode compétition ──────────────────────────
 function drawCompetition() {
   fill(255); noStroke();
   textSize(14); textAlign(CENTER, CENTER);
   text('🏆 Mode Compétition', CANVAS_W / 2, CANVAS_H / 2);
 }
 
+// ── Debug info ────────────────────────────────
 function drawDebugInfo() {
+  const s = trainingManager.stats;
   fill(255, 255, 255, 180);
   noStroke();
   textSize(10);
   textAlign(LEFT, TOP);
-  text(`FPS: ${Math.round(frameRate())}`,               8, 8);
-  text(`État: ${gm.state}`,                             8, 22);
-  text(`Gén: ${gm.generation} | Niv: ${gm.levelIndex}`,8, 36);
-  text(`Agent X: ${testAgent.x.toFixed(1)}px`,          8, 78);
+  text(`FPS: ${Math.round(frameRate())}`,              8,  8);
+  text(`État: ${gm.state}`,                            8, 22);
+  text(`Gén: ${s.generation} | Niv: ${s.levelIndex}`, 8, 36);
+  text(`Vivants: ${s.aliveCount}/${s.totalAgents}`,    8, 50);
+  text(`Best fitness: ${s.bestFitness.toFixed(0)}`,    8, 64);
+  text(`Difficulté: ${s.difficulty}`,                  8, 78);
   PhysicsDebug.draw();
 }
 
+// ── Inputs ────────────────────────────────────
 function mousePressed() {
   if (mouseButton === LEFT) inputManager.onClick(camera);
 }
@@ -144,10 +118,9 @@ function mousePressed() {
 function keyPressed() {
   if (key === 't' || key === 'T') gm.setState(GameManager.STATES.TRAINING);
   if (key === 'c' || key === 'C') gm.setState(GameManager.STATES.COMPETITION);
-  if (key === 'r' || key === 'R') _generateNewLevel();
-
-  if (key === ' ') {
-    if (testAgent.isOnGround) PhysicsDebug.onJumpStart(testAgent);
-    testAgent.jump();
+  // R → reset complet de l'entraînement
+  if (key === 'r' || key === 'R') {
+    gm.reset();
+    trainingManager = new TrainingManager(tileMap, levelGenerator);
   }
 }

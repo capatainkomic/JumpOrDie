@@ -25,40 +25,40 @@ class LevelGenerator {
 
   static RULES = {
     easy: {
-      gapMin: 2, gapMax: 10, gapFreq: 0.20,
-      groundMin: 10, groundMax: 18,
-      platMin: 4, platMax: 8,
-      platFreq: 0.30,
+      gapMin: 2, gapMax: 4, gapFreq: 0.18,
+      groundMin: 8, groundMax: 14,
+      platMin: 3, platMax: 4,
+      platFreq: 0.05,
       platMinH: 4, platMaxH: 6,
-      enemySpeed: [1, 2], enemyFreq: 0.15,
-      cherryFreq: 0.5,
+      enemySpeed: [1, 2], enemyFreq: 0,
+      cherryFreq: 0.08,
     },
     medium: {
-      gapMin: 3, gapMax: 13, gapFreq: 0.28,
-      groundMin: 8, groundMax: 15,
-      platMin: 3, platMax: 7,
-      platFreq: 0.35,
+      gapMin: 2, gapMax: 6, gapFreq: 0.22,
+      groundMin: 6, groundMax: 12,
+      platMin: 3, platMax: 6,
+      platFreq: 0.22,
       platMinH: 4, platMaxH: 6,
-      enemySpeed: [1, 2], enemyFreq: 0.25,
-      cherryFreq: 0.35,
+      enemySpeed: [1, 2], enemyFreq: 0.0,
+      cherryFreq: 0.15,
     },
     hard: {
-      gapMin: 4, gapMax: 16, gapFreq: 0.38,
+      gapMin: 2, gapMax: 9, gapFreq: 0.28,
       groundMin: 5, groundMax: 10,
       platMin: 3, platMax: 6,
-      platFreq: 0.40,
+      platFreq: 0.25,
       platMinH: 4, platMaxH: 6,
-      enemySpeed: [2, 3], enemyFreq: 0.35,
-      cherryFreq: 0.25,
+      enemySpeed: [2, 3], enemyFreq: 0.0,
+      cherryFreq: 0.40,
     },
     killer: {
-      gapMin: 5, gapMax: 18, gapFreq: 0.50,
+      gapMin: 3, gapMax: 9, gapFreq: 0.28,
       groundMin: 4, groundMax: 8,
       platMin: 2, platMax: 5,
-      platFreq: 0.45,
+      platFreq: 0.25,
       platMinH: 4, platMaxH: 6,
-      enemySpeed: [2, 3], enemyFreq: 0.50,
-      cherryFreq: 0.15,
+      enemySpeed: [1, 2], enemyFreq: 0.12,
+      cherryFreq: 0.25,
     },
   };
 
@@ -212,27 +212,39 @@ class LevelGenerator {
 
   // ── Plateformes dans un gap (bridges) ────────
   _placeGapBridges(elements, gapStartT, gapT, groundY, T, rules) {
-    const px        = (tiles) => tiles * T;
-    const jumpT     = LevelGenerator.MAX_JUMP_DISTANCE_T;
-    const minPlatWT = rules.platMin;
-    const maxPlatWT = rules.platMax;
+    const px       = (tiles) => tiles * T;
+    const jumpT    = LevelGenerator.MAX_JUMP_DISTANCE_T;
+    const minSP    = LevelGenerator.MIN_PLAT_SPACING_T;
+    const minPlatW = rules.platMin;
+    const maxPlatW = rules.platMax;
 
-    let remainingGapT  = gapT;
-    let currentCursorT = gapStartT;
+    let cursorT      = gapStartT;   // extrémité droite dernière plat (ou début gap)
+    let remainingT   = gapT;        // distance restante jusqu'au bord droit du gap
+    let placedCount  = 0;           // nombre de plateformes placées
 
-    while (remainingGapT > jumpT) {
-      const minOffsetT = LevelGenerator.MIN_PLAT_SPACING_T;
-      const maxOffsetT = jumpT / 2;
-      const offsetT    = Math.floor(random(minOffsetT, Math.max(minOffsetT, maxOffsetT) + 1));
-      const platStartT = currentCursorT + offsetT;
+    while (remainingT > jumpT) {
+      // Offset depuis cursorT — entre MIN_SP et jumpT - minPlatW
+      // pour garantir qu'une plateforme de taille min rentre
+      const maxOffsetT = jumpT - minPlatW;
+      if (maxOffsetT < minSP) break; // impossible de placer
 
-      if (platStartT + minPlatWT >= gapStartT + gapT) break;
+      const offsetT    = Math.floor(random(minSP, maxOffsetT + 1));
+      const platStartT = cursorT + offsetT;
 
-      const nearEnd  = platStartT + maxPlatWT >= gapStartT + gapT;
-      const platWT   = nearEnd
-        ? Math.floor(random(minPlatWT, maxPlatWT - 2))
-        : Math.floor(random(minPlatWT, maxPlatWT + 1));
-      const hT       = Math.floor(random(rules.platMinH, rules.platMaxH));
+      // Espace disponible entre platStart et bord droit du gap
+      // en laissant MIN_SP de marge à droite pour sauter depuis la plat
+      const availableT = (gapStartT + gapT) - platStartT - minSP;
+
+      // Pas assez de place pour une plateforme minimale → stop
+      if (availableT < minPlatW) break;
+
+      // Largeur clampée à l'espace réel disponible
+      const platWT = Math.floor(random(
+        minPlatW,
+        Math.min(maxPlatW, availableT) + 1
+      ));
+
+      const hT = Math.floor(random(rules.platMinH, rules.platMaxH));
 
       elements.push({
         type : 'platform',
@@ -240,9 +252,9 @@ class LevelGenerator {
         y    : groundY - hT * T,
         width: px(platWT),
       });
+      placedCount++;
 
       if (random() < rules.cherryFreq) {
-        // Cherry sur la plateforme si pas d'eagle
         elements.push({
           type: 'cherry',
           x   : px(platStartT) + px(platWT) / 2,
@@ -250,8 +262,26 @@ class LevelGenerator {
         });
       }
 
-      currentCursorT = platStartT + platWT;
-      remainingGapT  = gapStartT + gapT - currentCursorT;
+      // Avancer depuis l'extrémité droite de la plateforme
+      cursorT    = platStartT + platWT;
+      remainingT = gapStartT + gapT - cursorT;
+    }
+
+    // Garantie : si aucune plateforme placée mais gap trop grand
+    // → placer une plateforme centrée dans le gap
+    if (placedCount === 0 && gapT > jumpT) {
+      const platWT     = minPlatW;
+      const platStartT = gapStartT + Math.floor((gapT - platWT) / 2);
+      const hT         = Math.floor(random(rules.platMinH, rules.platMaxH));
+
+      if (platWT >= 1) {
+        elements.push({
+          type : 'platform',
+          x    : px(platStartT),
+          y    : groundY - hT * T,
+          width: px(platWT),
+        });
+      }
     }
   }
 

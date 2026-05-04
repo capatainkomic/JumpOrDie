@@ -72,14 +72,18 @@ class Level {
 
   // ── Met à jour les ennemis et les cerises ────
   // agent : Agent actif, score : { value: Number }
-  update(agent, score) {
-    for (const enemy of this.enemies) {
-      enemy.update(agent);
-    }
-    for (const cherry of this.cherries) {
-      cherry.update(agent, score);
-    }
+  update(agents) {
+    const alive = agents.filter(a => !a.isDead);
 
+    // Mouvement + animation — une seule fois par frame
+    for (const enemy  of this.enemies)  enemy.updateMovement();
+    for (const cherry of this.cherries) cherry.updateAnimation();
+
+    // Collisions — pour chaque agent vivant
+    for (const agent of alive) {
+      for (const enemy  of this.enemies)  enemy._checkCollision(agent);
+      for (const cherry of this.cherries) cherry._checkCollision(agent);
+    }
   }
 
   // ── Rendu complet du niveau ──────────────────
@@ -105,7 +109,14 @@ class Level {
     }
   }
 
-  // ── Drapeau de fin temporaire ────────────────
+  // ── Reset cerises pour nouvelle génération ───
+  // Les cerises restent visibles — c'est le Set
+  // de chaque agent qui est resetté dans Population
+  resetCherries() {
+    // Rien à faire ici — les cerises n'ont plus d'état collected
+    // Le reset se fait via agent._collectedCherries = new Set()
+    // dans _spawnPopulation() du TrainingManager
+  }
   _drawFinishFlag(x, y) {
     stroke(255, 50, 50);
     strokeWeight(3);

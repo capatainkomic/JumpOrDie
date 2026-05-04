@@ -1,5 +1,17 @@
-
-
+// ==============================================
+// Enemy.js
+//
+// Classe de base Enemy + sous-classes :
+//   Eagle   → statique sur plateforme, animation battement d'ailes
+//   Opossum → patrouille sur sa section de ground (path following)
+//
+// Chargement des sprites :
+//   assets/characters/eagle/eagle-attack-1.png  .. eagle-attack-4.png
+//   assets/characters/opossum/opossum-1.png     .. opossum-6.png
+//
+// Collision AABB avec un Agent → agent.isDead = true
+// ==============================================
+ 
 class Enemy {
  
   // Cadence d'animation commune (frames p5 entre chaque sprite)
@@ -24,7 +36,9 @@ class Enemy {
     this._frameTicker = 0;
   }
  
-  // ── Largeur / hauteur AABB basées sur le premier sprite ──
+  // ── Largeur / hauteur AABB ───────────────────
+  // Surchargées par les sous-classes via SPRITE_W/H
+  // pour éviter de dépendre du chargement async des images
   get w() { return this.frames[0]?.width  ?? TILE_SIZE; }
   get h() { return this.frames[0]?.height ?? TILE_SIZE; }
  
@@ -54,7 +68,21 @@ class Enemy {
   }
  
   // ── Interface publique ───────────────────────
-  // Surchargée par les sous-classes
-  update(agent) { this._tickAnim(); }
-  draw()        {}
+  // updateMovement : animation + déplacement (1x/frame)
+  // _checkCollision : collision avec un agent
+  updateMovement() {
+    this._tickAnim();
+  }
+
+  _checkCollision(agent) {
+    if (this._collidesWithAgent(agent)) agent.isDead = true;
+  }
+
+  // Gardé pour compatibilité si appelé directement
+  update(agent) {
+    this.updateMovement();
+    this._checkCollision(agent);
+  }
+
+  draw() {}
 }

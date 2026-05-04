@@ -4,15 +4,18 @@
 // Collectible animé — séquence :
 //   assets/objects/cherry/cherry-1.png .. cherry-7.png
 //
-// Collision AABB avec un Agent → collectée, score++
+// Chaque cerise a un ID unique.
+// La collecte est trackée par agent (Set d'IDs)
+// et non plus sur la cerise elle-même —
+// ainsi plusieurs agents peuvent collecter
+// la même cerise indépendamment.
 // ==============================================
 
 class Cherry {
 
-  static ANIM_RATE = 6; // frames p5 entre chaque sprite
-
-  // frames : Cherry.frames (chargés via preload)
-  static frames = [];
+  static ANIM_RATE = 6;
+  static frames    = [];
+  static _nextId   = 0; // compteur global pour IDs uniques
 
   static preload() {
     Cherry.frames = [];
@@ -21,43 +24,41 @@ class Cherry {
     }
   }
 
-  // x, y = centre du collectible (cohérent avec le placement dans LevelGenerator)
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.x  = x;
+    this.y  = y;
+    this.id = Cherry._nextId++; // ID unique
 
-    this.collected    = false;
     this._frameIndex  = 0;
     this._frameTicker = 0;
   }
 
-  // ── Dimensions AABB basées sur le premier sprite ──
+  // ── AABB ─────────────────────────────────────
   get w() { return Cherry.frames[0]?.width  ?? TILE_SIZE; }
   get h() { return Cherry.frames[0]?.height ?? TILE_SIZE; }
 
-  // ── Rectangle AABB (centré sur x, y) ────────
   get left()   { return this.x - this.w / 2; }
   get right()  { return this.x + this.w / 2; }
   get top()    { return this.y - this.h / 2; }
   get bottom() { return this.y + this.h / 2; }
 
-  // ── Update : animation + détection collecte ──
-  // score : objet { value: Number } passé par référence depuis sketch.js
-  update(agent, score) {
-    if (this.collected) return;
+  // ── Animation (1x par frame) ─────────────────
+  updateAnimation() { this._tickAnim(); }
 
-    this._tickAnim();
+  // ── Collision pour un agent ───────────────────
+  _checkCollision(agent) {
+    // Chaque agent a son propre Set de cerises collectées
+    if (agent._collectedCherries.has(this.id)) return;
 
     if (this._collidesWithAgent(agent)) {
-      this.collected = true;
-      score.value++;
+      agent._collectedCherries.add(this.id);
+      agent.cherriesCollected++;
     }
   }
 
   // ── Rendu ────────────────────────────────────
+  // La cerise reste visible pour tous les agents
   draw() {
-    if (this.collected) return;
-
     const img = Cherry.frames[this._frameIndex];
     if (img) image(img, this.left, this.top);
   }

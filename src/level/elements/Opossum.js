@@ -1,4 +1,3 @@
-
 // ==============================================
 // Opossum — patrouille sur sa section de ground
 // ==============================================
@@ -16,6 +15,10 @@ class Opossum extends Enemy {
   }
  
   // patrolLeft / patrolRight : bornes X de la patrouille en pixels
+  // AABB basée sur les constantes — pas sur le chargement async
+  get w() { return Opossum.SPRITE_W; }
+  get h() { return Opossum.SPRITE_H; }
+
   constructor(x, y, patrolLeft, patrolRight) {
     super(x, y, Opossum.frames);
  
@@ -26,13 +29,13 @@ class Opossum extends Enemy {
     this._dir = -1;
   }
  
-  update(agent) {
+  updateMovement() {
     this._tickAnim();
     this._move();
- 
-    if (this._collidesWithAgent(agent)) {
-      agent.isDead = true;
-    }
+  }
+
+  _checkCollision(agent) {
+    if (this._collidesWithAgent(agent)) agent.isDead = true;
   }
  
   _move() {
