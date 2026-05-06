@@ -1,52 +1,101 @@
-/* =============================================
-   JumpOrDie — style.css
-   Reset + layout de base
-   ============================================= */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ═══════════════════════════════════════════
+   CSS VARIABLES — Pixel RPG Palette
+   ═══════════════════════════════════════════ */
 :root {
-  --color-bg:        #1a1a2e;
-  --color-panel:     #16213e;
-  --color-border:    #0f3460;
-  --color-accent:    #e94560;
-  --color-green:     #27ae60;
-  --color-gold:      #f1c40f;
-  --color-text:      #eaeaea;
-  --color-text-muted:#8a8a9a;
+  --sand      : #F5C842;
+  --amber     : #E8A020;
+  --coral     : #F5654B;
+  --green     : #5DBB63;
+  --moss      : #4A7C3F;
+  --white     : #F8F8F0;
+  --parchment : #F0D9A0;
+  --parch-dk  : #D4B87A;
+  --wood      : #8B5E3C;
+  --wood-dk   : #5C3A1E;
+  --dark      : rgba(10, 15, 35, 0.95);
+  --border    : #F5C842;
+  --red       : #D63031;
+  --sky       : #5BC8F5;
 
-  --panel-width:     220px;
-  --topbar-height:   48px;
-  --canvas-width:    800px;
-  --canvas-height:   400px;
+  --panel-bg  : rgba(12, 18, 40, 0.96);
+  --panel-border: 2px solid #F5C842;
 }
+
+/* ═══════════════════════════════════════════
+   RESET + BODY — Pixel game background
+   ═══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
-  width: 100%;
-  height: 100%;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: 'Courier New', monospace;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
-  user-select: none;
+  font-family: 'VT323', monospace;
+  image-rendering: pixelated;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* ── Layout principal ── */
+/* Layered pixel art background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    url('./assets/background parallax/sea_layer_1.png') center/cover no-repeat;
+  
+  z-index: -2;
+}
+
+/* Subtle dark vignette over bg */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 60%,
+    transparent 30%,
+    rgba(5, 12, 30, 0) 100%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════ */
 #app {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  padding-top: var(--topbar-height);
+  align-items: stretch;
+  height: 400px;
+  position: relative;
+  /* Wood-frame outer border */
+  outline: 4px solid #5C3A1E;
+  outline-offset: 0;
+  box-shadow:
+    0 0 0 8px #8B5E3C,
+    0 0 0 12px #5C3A1E,
+    0 0 40px rgba(0,0,0,0.7),
+    0 0 80px rgba(0,0,0,0.4);
 }
 
-/* ── Canvas container ── */
+/* Corner decorations via pseudo-elements on #app */
+#app::before, #app::after {
+  content: '✦';
+  position: absolute;
+  font-size: 14px;
+  color: #F5C842;
+  text-shadow: 0 0 6px #F5C842;
+  z-index: 100;
+  pointer-events: none;
+}
+#app::before { top: -18px; left: -18px; }
+#app::after  { top: -18px; right: -18px; }
+
 #canvas-container {
   position: relative;
   flex-shrink: 0;
@@ -54,222 +103,709 @@ html, body {
 
 #canvas-container canvas {
   display: block;
-  border: 2px solid var(--color-border);
-  border-radius: 4px;
+  image-rendering: pixelated;
 }
 
-/* ── Panels latéraux ── */
-.ui-panel {
-  width: var(--panel-width);
-  height: var(--canvas-height);
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px 10px;
-  flex-shrink: 0;
-}
+/* ═══════════════════════════════════════════
+   CONFIG OVERLAY — Neumorphism + Retrofuturism
+   Layout optimisé zero-scroll pour 800×400
+   ═══════════════════════════════════════════ */
 
-#ui-left  { margin-right: 8px; }
-#ui-right { margin-left: 8px; }
-
-/* ── Scrollbar custom ── */
-.ui-panel::-webkit-scrollbar {
-  width: 4px;
-}
-.ui-panel::-webkit-scrollbar-track {
-  background: var(--color-bg);
-}
-.ui-panel::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 2px;
-}
-
-/* ── Éléments UI communs ── */
-.panel-section {
-  margin-bottom: 14px;
-}
-
-.panel-title {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--color-text-muted);
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.slider-group {
-  display: flex;
+#config-overlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 10;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
+  align-items: stretch;
+  padding: 5px 10px 5px;
+  gap: 4px;
+  overflow: hidden;
+  background: #EAF0F8;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  box-sizing: border-box;
 }
 
-.slider-row {
-  display: flex;
+/* ── Header ──────────────────────────────── */
+.cfg-header { text-align: center; flex-shrink: 0; }
+
+.cfg-header-plaque {
+  display: inline-flex;
   flex-direction: column;
-  gap: 3px;
-}
-
-.slider-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--color-text);
-}
-
-.slider-label span:last-child {
-  color: var(--color-gold);
-  font-weight: bold;
-}
-
-input[type="range"] {
-  width: 100%;
-  height: 4px;
-  appearance: none;
-  background: var(--color-border);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  cursor: pointer;
-}
-
-select {
-  width: 100%;
-  background: var(--color-bg);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: 3px;
-  padding: 4px 6px;
-  font-size: 11px;
-  font-family: 'Courier New', monospace;
-  cursor: pointer;
-  outline: none;
-}
-
-.btn {
-  width: 100%;
-  padding: 6px 8px;
-  font-size: 11px;
-  font-family: 'Courier New', monospace;
-  border-radius: 3px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  color: var(--color-text);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  margin-bottom: 4px;
-}
-
-.btn:hover {
-  background: var(--color-border);
-}
-
-.btn.primary {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #fff;
-  font-weight: bold;
-}
-
-.btn.primary:hover {
-  background: #c0392b;
-  border-color: #c0392b;
-}
-
-.btn.success {
-  background: var(--color-green);
-  border-color: var(--color-green);
-  color: #fff;
-}
-
-.btn.success:hover {
-  background: #219a52;
-}
-
-.divider {
-  height: 1px;
-  background: var(--color-border);
+  align-items: center;
+  gap: 0;
+  padding: 4px 20px 5px;
+  border-radius: 12px;
+  background: #EAF0F8;
+  position: relative; overflow: hidden;
   margin: 10px 0;
 }
 
-/* ── Badge stats ── */
-.stat-badge {
-  display: inline-flex;
+.cfg-header-plaque::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 8%; right: 8%; height: 2px;
+  background: linear-gradient(90deg, #FF6B9D, #FFD166, #06D6A0, #118AB2, #7C6EEB);
+}
+
+.cfg-title-main {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 900;
+  letter-spacing: 4px; text-transform: uppercase; color: #2D3A55;
+}
+
+.cfg-subtitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6px; font-weight: 700;
+  letter-spacing: 2px; color: #7B88A8; text-transform: uppercase;
+}
+
+/* ── 2 colonnes ──────────────────────────── */
+.cfg-main-panel {
+  flex: 1; display: flex; flex-direction: row;
+  gap: 10px; overflow: hidden; min-height: 0;
+}
+
+.cfg-col-left, .cfg-col-right {
+  flex: 1; display: flex; flex-direction: column;
+  gap: 3px; overflow: hidden; padding: 1px 2px;
+}
+
+/* ── Section headers colorés lumineux ────── */
+.cfg-section-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 8px; border-radius: 8px; flex-shrink: 0;
+  background: linear-gradient(135deg, #7C6EEB, #A78BFA);
+  box-shadow: 2px 3px 7px rgba(124,110,235,0.45);
+  margin-bottom: 12px;
+}
+
+.cfg-section-header.green {
+  background: linear-gradient(135deg, #06D6A0, #34D399);
+  box-shadow: 2px 3px 7px rgba(6,214,160,0.45);
+  margin-bottom: 12px;
+}
+
+.cfg-section-header.teal {
+  background: linear-gradient(135deg, #06D6A0, #34D399);
+  box-shadow: 2px 3px 7px rgba(17,138,178,0.45);
+  margin-bottom: 12px;
+}
+
+.cfg-section-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 7px; font-weight: 900;
+  letter-spacing: 1px; color: #fff; text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* ── Sliders ─────────────────────────────── */
+.cfg-slider-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 7px; border-radius: 7px; flex-shrink: 0;
+  background: #EAF0F8;
+  box-shadow: 2px 2px 5px #C8D0DE, -2px -2px 5px #FFFFFF;
+}
+
+.cfg-slider-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6px; font-weight: 800;
+  color: #4A5568; text-transform: uppercase;
+  width: 72px; flex-shrink: 0;
+}
+
+.cfg-slider-value {
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 900; color: #7C6EEB;
+  background: #EAF0F8;
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  border-radius: 5px; padding: 1px 4px;
+  min-width: 26px; text-align: center; flex-shrink: 0; border: none;
+}
+
+.cfg-slider-track { flex: 1; }
+
+input[type=range].cfg-range {
+  -webkit-appearance: none;
+  width: 100%; height: 5px; border-radius: 10px;
+  outline: none; cursor: pointer; border: none;
+  background: #EAF0F8;
+  box-shadow: inset 2px 2px 4px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+}
+
+input[type=range].cfg-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #EAF0F8;
+  box-shadow: 2px 2px 5px #C8D0DE, -2px -2px 5px #FFFFFF, 0 0 0 2px #7C6EEB;
+  cursor: pointer; transition: transform 0.1s;
+}
+
+input[type=range].cfg-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 2px 2px 5px #C8D0DE, -2px -2px 5px #FFFFFF, 0 0 0 2.5px #FF6B9D;
+}
+
+/* ── Select ──────────────────────────────── */
+.cfg-select-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 7px; border-radius: 7px; flex-shrink: 0;
+  background: #EAF0F8;
+  box-shadow: 2px 2px 5px #C8D0DE, -2px -2px 5px #FFFFFF;
+}
+
+.cfg-select-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6px; font-weight: 800;
+  color: #4A5568; text-transform: uppercase; flex-shrink: 0;
+}
+
+select.cfg-select-input {
+  flex: 1; background: #EAF0F8; color: #2D3A55; border: none;
+  border-radius: 5px; font-family: 'Nunito', sans-serif;
+  font-size: 7px; font-weight: 700; padding: 2px 5px;
+  cursor: pointer; outline: none;
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  -webkit-appearance: none;
+}
+
+/* ── Checkboxes en GRILLE 2×N ────────────── */
+.cfg-cb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.cfg-cb-grid-full {
+  grid-column: 1 / -1; /* parent qui prend toute la largeur */
+}
+
+.cfg-cb-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 3px 6px; border-radius: 6px;
+  background: #EAF0F8;
+  box-shadow: 1px 1px 3px #C8D0DE, -1px -1px 3px #FFFFFF;
+  cursor: pointer; transition: transform 0.1s; flex-shrink: 0;
+}
+
+.cfg-cb-row:hover { transform: scale(1.02); }
+
+.cfg-cb-row.child {
+  background: #EEF3FA;
+  box-shadow: 1px 1px 2px #C8D0DE, -1px -1px 2px #FFFFFF;
+}
+
+.cfg-cb-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6px; font-weight: 800;
+  color: #4A5568; text-transform: uppercase;
+}
+
+.cfg-cb-check {
+  width: 14px; height: 14px; border-radius: 4px;
+  background: #EAF0F8;
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: transparent; cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.cfg-cb-check.checked {
+  background: linear-gradient(135deg, #06D6A0, #34D399);
+  box-shadow: 1px 2px 5px rgba(6,214,160,0.5);
+  color: white;
+}
+
+/* ── Total inputs ────────────────────────── */
+.cfg-total-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 3px 8px; border-radius: 7px; flex-shrink: 0;
+  background: #EAF0F8;
+  box-shadow: inset 2px 2px 4px #C8D0DE, inset -2px -2px 4px #FFFFFF;
+}
+
+.cfg-total-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6.5px; font-weight: 800;
+  color: #4A5568; text-transform: uppercase;
+}
+
+.cfg-total-value {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px; font-weight: 900;
+  color: #FFD166; text-shadow: 1px 1px 0 #B89400;
+}
+
+/* ── Difficulté ──────────────────────────── */
+.cfg-diff-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 4px; flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.cfg-diff-btn {
+  display: flex !important; flex-direction: column !important;
+  align-items: center !important; justify-content: center !important;
+  gap: 2px !important; padding: 5px 2px !important;
+  border-radius: 8px !important; border: none !important;
+  cursor: pointer !important; width: auto !important;
+  font-size: inherit !important; letter-spacing: normal !important;
+  text-transform: none !important; margin: 0 !important;
+  transition: all 0.12s !important; background: #EAF0F8 !important;
+  box-shadow: 3px 3px 6px #C8D0DE, -3px -3px 6px #FFFFFF !important;
+}
+
+.cfg-diff-btn:hover  { box-shadow: 4px 4px 8px #C8D0DE, -4px -4px 8px #FFFFFF !important; }
+.cfg-diff-btn.active { box-shadow: inset 2px 2px 5px #C8D0DE, inset -2px -2px 5px #FFFFFF !important; }
+
+.cfg-diff-btn.easy.active   { background: #D1FAE5 !important; }
+.cfg-diff-btn.medium.active { background: #FEF9C3 !important; }
+.cfg-diff-btn.hard.active   { background: #FFE4E6 !important; }
+.cfg-diff-btn.killer.active { background: #EDE9FE !important; }
+
+.cfg-diff-icon  { font-size: 14px; line-height: 1; }
+.cfg-diff-label { font-family:'Nunito',sans-serif; font-size:6px; font-weight:900; color:#4A5568; text-transform:uppercase; }
+
+.cfg-diff-btn.easy.active   .cfg-diff-label { color:#065F46; }
+.cfg-diff-btn.medium.active .cfg-diff-label { color:#713F12; }
+.cfg-diff-btn.hard.active   .cfg-diff-label { color:#7F1D1D; }
+.cfg-diff-btn.killer.active .cfg-diff-label { color:#3B0764; }
+
+/* ── Condition arrêt — COMPACT inline ────── */
+/* Phrase condensée dans un seul bloc */
+.cfg-stop-phrase-box {
+  padding: 4px 8px; border-radius: 7px; flex-shrink: 0;
+  background: #EAF0F8;
+  box-shadow: inset 2px 2px 4px #C8D0DE, inset -2px -2px 4px #FFFFFF;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.cfg-stop-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6.5px; font-weight: 700;
+  color: #4A5568; line-height: 1.7;
+  text-transform: uppercase; letter-spacing: 0.2px;
+}
+
+.cfg-stop-pct-agents {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 900;
+  color: #06D6A0; 
+}
+
+.cfg-stop-pct-level {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px; font-weight: 900;
+  color: #118AB2; 
+}
+
+/* Deux sliders côte à côte */
+.cfg-stop-sliders-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cfg-stop-slider-block {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 3px 6px; border-radius: 7px;
+  background: #EAF0F8;
+  box-shadow: 2px 2px 4px #C8D0DE, -2px -2px 4px #FFFFFF;
+}
+
+.cfg-stop-slider-head {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.cfg-stop-slider-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6px; font-weight: 800;
+  color: #4A5568; text-transform: uppercase;
+}
+
+.cfg-sl-val {
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 9px !important; font-weight: 900 !important;
+  color: #7C6EEB !important;
+}
+
+.cfg-stop-slider-row {
+  display: flex; align-items: center; gap: 3px;
+}
+
+.cfg-stop-slider-icon { font-size: 10px; flex-shrink: 0; }
+
+/* ── Bouton START coloré ─────────────────── */
+.cfg-start-btn {
+  width: 100% !important; padding: 8px !important;
+  border-radius: 10px !important; border: none !important;
+  cursor: pointer !important; margin-top: 70px !important;
+  letter-spacing: 0 !important; text-transform: none !important;
+  font-size: inherit !important; flex-shrink: 0;
+  background: linear-gradient(135deg, #7C6EEB 0%, #C471ED 50%, #FF6B9D 100%) !important;
+  box-shadow: 3px 4px 10px rgba(124,110,235,0.5), -1px -1px 4px rgba(255,255,255,0.3) !important;
+  display: flex !important; flex-direction: column !important;
+  align-items: center !important; gap: 1px !important;
+  transition: all 0.12s !important;
+  
+}
+
+.cfg-start-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 4px 6px 14px rgba(124,110,235,0.6), -1px -1px 4px rgba(255,255,255,0.3) !important;
+}
+
+.cfg-start-btn:active {
+  transform: translateY(1px) !important;
+  box-shadow: 1px 2px 5px rgba(124,110,235,0.4) !important;
+}
+
+.cfg-start-main {
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 11px !important; font-weight: 900 !important;
+  letter-spacing: 3px !important; color: #fff !important;
+  text-transform: uppercase !important; display: block !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+.cfg-start-sub {
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 6px !important; font-weight: 700 !important;
+  letter-spacing: 2px !important; color: rgba(255,255,255,0.8) !important;
+  text-transform: uppercase !important; display: block !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.8) !important;
+}
+
+/* ── Boutons +/- ─────────────────────────── */
+.cfg-btn-minus, .cfg-btn-plus {
+  width: 18px !important; height: 18px !important; min-width: 18px !important;
+  border-radius: 5px !important; border: none !important;
+  background: #EAF0F8 !important;
+  box-shadow: 2px 2px 4px #C8D0DE, -2px -2px 4px #FFFFFF !important;
+  color: #7C6EEB !important; font-family: 'Nunito', sans-serif !important;
+  font-size: 14px !important; font-weight: 900 !important;
+  cursor: pointer !important; display: flex !important;
+  align-items: center !important; justify-content: center !important;
+  flex-shrink: 0 !important; padding: 0 !important; line-height: 1 !important;
+  letter-spacing: 0 !important; text-transform: none !important; margin: 0 !important;
+  transition: all 0.1s !important;
+}
+
+.cfg-btn-minus:active, .cfg-btn-plus:active {
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF !important;
+}
+
+/* ═══════════════════════════════════════════
+   TRAINING PANELS
+   Même style que config overlay :
+   fond #EAF0F8, neumorphisme, Nunito, couleurs vives
+   ═══════════════════════════════════════════ */
+
+.ui-panel {
+  width: 0; min-width: 0; height: 400px;
+  overflow: hidden;
+  background: #EAF0F8;
+  border: 0 solid #7C6EEB;
+  transition: width 0.18s ease, min-width 0.18s ease, border-width 0.18s ease;
+}
+
+.ui-panel.visible {
+  width: 200px; min-width: 200px;
+  border-width: 2px;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 7px 7px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.ui-panel::-webkit-scrollbar { width: 3px; }
+.ui-panel::-webkit-scrollbar-track { background: #D8E0EE; }
+.ui-panel::-webkit-scrollbar-thumb { background: #7C6EEB; border-radius: 2px; }
+
+/* ── Section headers (meme style config) ── */
+.ui-panel h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 7px; font-weight: 900;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 8px;
+  margin: 0; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+.h-purple { background: linear-gradient(135deg, #7C6EEB, #A78BFA); box-shadow: 2px 3px 7px rgba(124,110,235,0.45); }
+.h-green  { background: linear-gradient(135deg, #06D6A0, #34D399); box-shadow: 2px 3px 7px rgba(6,214,160,0.4); }
+.h-blue   { background: linear-gradient(135deg, #118AB2, #38BDF8); box-shadow: 2px 3px 7px rgba(17,138,178,0.4); }
+.h-pink   { background: linear-gradient(135deg, #FF6B9D, #F472B6); box-shadow: 2px 3px 7px rgba(255,107,157,0.4); }
+.h-orange { background: linear-gradient(135deg, #F59E0B, #FCD34D); box-shadow: 2px 3px 7px rgba(245,158,11,0.45); }
+
+/* ── Carte générique neumorphique ────────── */
+.panel-card {
+  background: #EAF0F8;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px #C8D0DE, -2px -2px 5px #FFFFFF;
+  padding: 5px 8px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+
+/* ── Stats rows ──────────────────────────── */
+.stat-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(124,110,235,0.08);
+}
+.stat-row:last-child { border-bottom: none; }
+
+.stat-lbl {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6.5px; font-weight: 800;
+  color: #7B88A8; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.stat-val {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 900; color: #FFD166;
+}
+.v-purple { color: #7C6EEB; }
+.v-green  { color: #06D6A0; }
+.v-pink   { color: #FF6B9D; }
+.v-blue   { color: #118AB2; }
+
+/* ── Progression ─────────────────────────── */
+.prog-track {
+  display: flex; gap: 3px; height: 22px;
+}
+
+.prog-step {
+  flex: 1; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-size: 5.5px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: #EAF0F8;
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  color: #B0BAC8;
+  transition: all 0.3s;
+}
+
+.prog-step.done   {
+  background: linear-gradient(135deg, #06D6A0, #34D399);
+  box-shadow: 1px 2px 6px rgba(6,214,160,0.45);
+  color: #fff;
+}
+.prog-step.active {
+  background: linear-gradient(135deg, #7C6EEB, #A78BFA);
+  box-shadow: 1px 2px 8px rgba(124,110,235,0.55);
+  color: #fff;
+  animation: stepglow 1.5s ease infinite;
+}
+.prog-step.skipped {
+  background: #EAF0F8;
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  color: #D0D8E8;
+}
+.prog-step.locked {
+  background: #EAF0F8;
+  box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  color: #C0C8D8;
+}
+
+@keyframes stepglow {
+  0%,100% { box-shadow: 1px 2px 6px rgba(124,110,235,0.4); }
+  50%      { box-shadow: 1px 2px 12px rgba(124,110,235,0.7); }
+}
+
+.prog-info {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 1px;
+}
+.prog-lbl   { font-family: 'Nunito', sans-serif; font-size: 6px; font-weight: 700; color: #B0BAC8; text-transform: uppercase; }
+.prog-count { font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 900; color: #FFD166; }
+
+/* ── Boutons neumorphiques ────────────────── */
+button {
+  font-family: 'Nunito', sans-serif;
+  font-size: 7px; font-weight: 900;
+  cursor: pointer; border: none;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  width: 100%; margin: 0;
+  border-radius: 8px;
+  transition: all 0.12s;
+  background: #EAF0F8;
+  box-shadow: 3px 3px 7px #C8D0DE, -3px -3px 7px #FFFFFF;
+  color: #4A5568;
+  padding: 7px 8px;
+}
+
+button:hover  { box-shadow: 4px 4px 9px #C8D0DE, -4px -4px 9px #FFFFFF; transform: translateY(-1px); }
+button:active { box-shadow: inset 2px 2px 4px #C8D0DE, inset -2px -2px 4px #FFFFFF; transform: translateY(0); }
+
+/* Variantes colorées — même style que cfg-start-btn */
+/* ── Grille 2x2 boutons carrés ───────────── */
+.btn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.btn-square {
+  aspect-ratio: 1;
+  border-radius: 10px !important;
+  border: none !important;
+  cursor: pointer;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  letter-spacing: 0 !important;
+  transition: all 0.12s !important;
+}
+
+.btn-square:hover  { filter: brightness(1.1); transform: translateY(-2px) !important; }
+.btn-square:active { transform: translateY(1px) !important; filter: brightness(0.9); }
+
+.btn-sq-icon {
+  font-size: 18px;
+  line-height: 1;
+  display: block;
+}
+
+.btn-sq-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 6px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  color: #fff;
+}
+
+.btn-stop {
+  background: linear-gradient(135deg, #EF4444, #F87171) !important;
+  box-shadow: 2px 3px 8px rgba(239,68,68,0.45), -1px -1px 4px rgba(255,255,255,0.3) !important;
+}
+.btn-resume {
+  background: linear-gradient(135deg, #06D6A0, #34D399) !important;
+  box-shadow: 2px 3px 8px rgba(6,214,160,0.45), -1px -1px 4px rgba(255,255,255,0.3) !important;
+}
+.btn-save {
+  background: linear-gradient(135deg, #7C6EEB, #A78BFA) !important;
+  box-shadow: 2px 3px 8px rgba(124,110,235,0.45), -1px -1px 4px rgba(255,255,255,0.3) !important;
+}
+.btn-export {
+  background: linear-gradient(135deg, #118AB2, #38BDF8) !important;
+  box-shadow: 2px 3px 8px rgba(17,138,178,0.45), -1px -1px 4px rgba(255,255,255,0.3) !important;
+}
+.btn-menu {
+  background: linear-gradient(135deg, #F59E0B, #FCD34D);
+  box-shadow: 2px 3px 8px rgba(245,158,11,0.45);
+  color: #fff;
+}
+.btn-newcfg {
+  background: #EAF0F8;
+  box-shadow: 2px 2px 5px #C8D0DE, -2px -2px 5px #FFFFFF;
+  color: #7C6EEB;
+  border: 1px solid rgba(124,110,235,0.3) !important;
+}
+
+.btn-label { display: block; font-size: 7px; font-weight: 900; }
+.btn-sub   { display: block; font-size: 5.5px; font-weight: 600; opacity: 0.8; text-transform: none; letter-spacing: 0; margin-top: 1px; }
+
+/* ── Cercle de progression ───────────────── */
+.prog-circle-wrap {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  padding: 4px 0;
 }
 
-.stat-badge.green  { border-color: var(--color-green);  color: var(--color-green); }
-.stat-badge.gold   { border-color: var(--color-gold);   color: var(--color-gold); }
-.stat-badge.red    { border-color: var(--color-accent); color: var(--color-accent); }
-
-/* ── Progress bar ── */
-.progress-bar {
-  width: 100%;
-  height: 6px;
-  background: var(--color-border);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 4px;
+.prog-circle-svg {
+  width: 80px; height: 80px;
 }
 
-.progress-fill {
-  height: 100%;
-  background: var(--color-green);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+.prog-circle-bg {
+  fill: none;
+  stroke: #C8D0DE;
+  stroke-width: 6;
 }
 
-/* ── Tab bar ── */
-#tab-bar {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-bottom: none;
-  border-radius: 6px 6px 0 0;
-  padding: 6px 10px 0;
-  z-index: 100;
+.prog-circle-bar {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
 }
 
-.tab-btn {
-  padding: 5px 14px;
-  font-size: 11px;
-  font-family: 'Courier New', monospace;
-  background: transparent;
-  color: var(--color-text-muted);
+.prog-circle-diff {
+  font-family: 'Nunito', sans-serif;
+  font-size: 9px; font-weight: 900;
+  text-anchor: middle; dominant-baseline: middle;
+}
+
+.prog-circle-gen {
+  font-family: 'Nunito', sans-serif;
+  font-size: 5.5px; font-weight: 700;
+  text-anchor: middle; dominant-baseline: middle;
+  fill: #B0BAC8;
+}
+
+.prog-levels {
+  font-family: 'Nunito', sans-serif;
+  font-size: 7px; font-weight: 800;
+  color: #7B88A8; text-transform: uppercase;
+  text-align: center;
+}
+
+.prog-levels span {
+  font-size: 11px; font-weight: 900;
+  color: #FFD166;
+}
+
+/* ── Séparateur ──────────────────────────── */
+hr.sep {
   border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  border-top: 1px solid rgba(124,110,235,0.12);
+  margin: 0;
 }
 
-.tab-btn:hover {
-  color: var(--color-text);
+
+
+   PAGE CORNER DECORATIONS
+   ═══════════════════════════════════════════ */
+.page-corner {
+  position: fixed;
+  width: 60px; height: 60px;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.8;
+  animation: cornerPulse 4s ease-in-out infinite;
+}
+.page-corner--tl { top: 8px;  left: 8px; }
+.page-corner--tr { top: 8px;  right: 8px; }
+.page-corner--bl { bottom: 8px; left: 8px; }
+.page-corner--br { bottom: 8px; right: 8px; }
+
+@keyframes cornerPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.9; }
 }
 
-.tab-btn.active {
-  color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
+/* ═══════════════════════════════════════════
+   CANVAS CONTAINER — pixel-crisp inner border
+   ═══════════════════════════════════════════ */
+#canvas-container {
+  position: relative;
+  flex-shrink: 0;
+  /* Inner glow */
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
 }

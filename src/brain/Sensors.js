@@ -28,45 +28,56 @@ class Sensors {
   ];
 
   // ── Calcul complet des inputs ────────────────
-  // Retourne un tableau de inputCount valeurs [0, 1]
+  // Retourne un tableau de valeurs [0, 1]
+  // Seuls les blocs activés dans gm.config.inputConfig
+  // sont inclus — le tableau a exactement inputCount valeurs
   static compute(agent, surfaces, enemies, cherries, inputCount) {
+    const cfg    = gm.config.inputConfig;
     const inputs = [];
 
-    // ── Bloc 1 : Grille spatiale ─────────────
-    for (const colT of Sensors.GRID_COLS) {
-      const cellX = agent.x + colT * TILE_SIZE;
-
-      for (const rowOffset of Sensors.ROW_OFFSETS) {
-        const cellY = agent.y + rowOffset;
-        inputs.push(Sensors._cellValue(cellX, cellY, surfaces));
+    // ── Bloc 1 : Grille spatiale (12 inputs) ─
+    if (cfg.grid) {
+      for (const colT of Sensors.GRID_COLS) {
+        const cellX = agent.x + colT * TILE_SIZE;
+        for (const rowOffset of Sensors.ROW_OFFSETS) {
+          const cellY = agent.y + rowOffset;
+          inputs.push(Sensors._cellValue(cellX, cellY, surfaces));
+        }
       }
     }
 
     // ── Bloc 2 : Forces Reynolds ─────────────
-    // Opossums (ennemis sol)
-    const opossums = enemies.filter(e => e instanceof Opossum);
-    const fOpossum = agent.avoidForce(opossums);
-    inputs.push(Sensors._normMag(fOpossum));
-    inputs.push(Sensors._normY(fOpossum));
+    if (cfg.avoidOpossum) {
+      const opossums = enemies.filter(e => e instanceof Opossum);
+      const f = agent.avoidForce(opossums);
+      inputs.push(Sensors._normMag(f));
+      inputs.push(Sensors._normY(f));
+    }
 
-    // Eagles (ennemis aériens)
-    const eagles = enemies.filter(e => e instanceof Eagle);
-    const fEagle = agent.avoidForce(eagles);
-    inputs.push(Sensors._normMag(fEagle));
-    inputs.push(Sensors._normY(fEagle));
+    if (cfg.avoidEagle) {
+      const eagles = enemies.filter(e => e instanceof Eagle);
+      const f = agent.avoidForce(eagles);
+      inputs.push(Sensors._normMag(f));
+      inputs.push(Sensors._normY(f));
+    }
 
-    // Seek cherry — seulement celles non collectées
-    const activeCherries = cherries.filter(c => !c.collected);
-    const fCherry = agent.seekForce(activeCherries);
-    inputs.push(Sensors._normMag(fCherry));
-    inputs.push(Sensors._normY(fCherry));
+    if (cfg.seekCherry) {
+      const active = cherries.filter(c => !agent._collectedCherries.has(c.id));
+      const f = agent.seekForce(active);
+      inputs.push(Sensors._normMag(f));
+      inputs.push(Sensors._normY(f));
+    }
 
     // ── Bloc 3 : États internes ───────────────
-    inputs.push(agent.isOnGround ? 0 : 1);
-    inputs.push(Sensors._normVY(agent.vy));
+    if (cfg.isOnGround) {
+      inputs.push(agent.isOnGround ? 0 : 1);
+    }
 
-    // Retourner les inputCount premiers
-    return inputs.slice(0, inputCount);
+    if (cfg.vertSpeed) {
+      inputs.push(Sensors._normVY(agent.vy));
+    }
+
+    return inputs; // longueur = inputCount exact
   }
 
   // ── Valeur d'une cellule de la grille ────────

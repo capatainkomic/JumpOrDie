@@ -41,6 +41,16 @@ class GameManager {
       activationFn           : 'sigmoid',
       mutationRate           : 0.08,
 
+      // Config inputs actifs (synchronisée avec UIPanel checkboxes)
+      inputConfig : {
+        grid        : true,
+        avoidOpossum: true,
+        avoidEagle  : true,
+        seekCherry  : true,
+        isOnGround  : true,
+        vertSpeed   : true,
+      },
+
       // Système hybride niveaux
       generationsPerLevel    : 10,   // gens max sur même niveau
       levelsBeforeDifficulty : 3,    // niveaux réussis avant difficulté++

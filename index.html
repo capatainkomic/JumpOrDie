@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JumpOrDie 🌊</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 
   <!-- p5.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
@@ -33,6 +35,10 @@
   <script src="src/level/LevelGenerator.js"></script>
   <script src="src/level/Level.js"></script>
 
+   <!-- Storage -->
+  <script src="src/storage/BrainStorage.js"></script>
+  <script src="src/storage/LevelStorage.js"></script>
+
   <!-- UI -->
   <script src="src/ui/HUD.js"></script>
   <script src="src/ui/UIPanel.js"></script>
@@ -47,20 +53,22 @@
   <script src="src/competition/CompetitionManager.js"></script>
   <script src="src/competition/Leaderboard.js"></script>
 
-  <!-- Storage -->
-  <script src="src/storage/BrainStorage.js"></script>
-  <script src="src/storage/LevelStorage.js"></script>
 
   <!-- Entry point -->
   <script src="sketch.js"></script>
 </head>
 <body>
+ 
   <div id="app">
-    <div id="ui-left"  class="ui-panel"></div>
-
-    <div id="canvas-container"></div>
-    
+    <div id="ui-left" class="ui-panel"></div>
+ 
+    <div id="canvas-container">
+      <!-- Overlay config — affiché par dessus le canvas en Phase 1 -->
+      <div id="config-overlay"></div>
+    </div>
+ 
     <div id="ui-right" class="ui-panel"></div>
   </div>
+ 
 </body>
 </html>
