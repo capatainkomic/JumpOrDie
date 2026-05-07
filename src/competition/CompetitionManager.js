@@ -137,65 +137,8 @@ class CompetitionManager {
   }
 
   // ── Draw race ─────────────────────────────
-  draw(camera) {
-    if (this.phase !== 'race') return;
-
-    // Trouver le meilleur agent vivant pour la caméra
-    const alive = this.agents.filter(a => !a.isDead);
-    const leader = alive.length > 0
-      ? alive.reduce((b, a) => a.distanceTravelled > b.distanceTravelled ? a : b, alive[0])
-      : (this.agents[0] || null);
-
-    // Parallax
-    if (leader) {
-      this._parallaxX = leader.x;
-    }
-    this._drawParallax();
-
-    // Jeu
-    camera.update(leader);
-    camera.begin();
-      this.level.draw();
-      for (const agent of this.agents) {
-        agent.draw();
-      }
-    camera.end();
-  }
 
   // ── Parallax ──────────────────────────────
-  _drawParallax() {
-    const camX = this._parallaxX;
-
-    // Dimensions réelles des images
-    const IMG_W = 160;
-    const IMG_H = 208;
-
-    // On scale pour couvrir la hauteur du canvas
-    const scale  = CANVAS_H / IMG_H;
-    const drawW  = IMG_W * scale;  // largeur d'une tuile après scale
-    const drawH  = CANVAS_H;
-
-    const drawLayer = (img, speed) => {
-      if (!img) return;
-      // Offset en pixels selon la position caméra
-      const offset = (camX * speed) % drawW;
-      // Nombre de tuiles pour couvrir le canvas + 1 pour le scroll
-      const count  = Math.ceil(CANVAS_W / drawW) + 2;
-      push();
-      imageMode(CORNER);
-      noTint();
-      for (let t = -1; t < count; t++) {
-        const x = t * drawW - offset;
-        image(img, x, 0, drawW, drawH);
-      }
-      pop();
-    };
-
-    // Ordre : fond → milieu → avant
-    drawLayer(this._bgLayers.clouds,    0.05);
-    drawLayer(this._bgLayers.mountains, 0.15);
-    drawLayer(this._bgLayers.trees,     0.35);
-  }
 
   // ── Stats pour leaderboard ────────────────
   get raceStats() {

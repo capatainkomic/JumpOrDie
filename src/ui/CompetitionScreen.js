@@ -6,6 +6,58 @@
 //             _openBrainSelector, _mkStat
 // ==============================================
 
+// ── Rendu de la course (extrait de CompetitionManager) ──────────────
+// POURQUOI : le rendu appartient à CompetitionScreen, pas à la logique
+// CompetitionManager expose now: agents, level, _parallaxX, _bgLayers
+
+function _drawParallax(cm) {
+  const camX = cm._parallaxX;
+  const IMG_W = 160;
+  const IMG_H = 208;
+  const scale  = CANVAS_H / IMG_H;
+  const drawW  = IMG_W * scale;
+  const drawH  = CANVAS_H;
+
+  const drawLayer = (img, speed) => {
+    if (!img) return;
+    const offset = (camX * speed) % drawW;
+    const count  = Math.ceil(CANVAS_W / drawW) + 2;
+    push();
+    imageMode(CORNER);
+    noTint();
+    for (let t = -1; t < count; t++) {
+      const x = t * drawW - offset;
+      image(img, x, 0, drawW, drawH);
+    }
+    pop();
+  };
+
+  drawLayer(cm._bgLayers.clouds,    0.05);
+  drawLayer(cm._bgLayers.mountains, 0.15);
+  drawLayer(cm._bgLayers.trees,     0.35);
+}
+
+function _drawCompetitionGame(cm, camera) {
+  const alive  = cm.agents.filter(a => !a.isDead);
+  const leader = alive.length > 0
+    ? alive.reduce((b, a) => a.distanceTravelled > b.distanceTravelled ? a : b, alive[0])
+    : (cm.agents[0] || null);
+
+  if (leader) cm._parallaxX = leader.x;
+
+  _drawParallax(cm);
+
+  camera.update(leader);
+  camera.begin();
+    cm.level.draw();
+    for (const agent of cm.agents) {
+      agent.draw();
+    }
+  camera.end();
+}
+
+
+
 function _drawCompetitionSetup() {
   uiPanel.showCompetitionSetup(competitionManager);
 
@@ -104,7 +156,7 @@ function _drawCompetitionRace() {
 
   // Update + draw (parallax intégré dans draw)
   competitionManager.update();
-  competitionManager.draw(camera);
+  _drawCompetitionGame(competitionManager, camera);
 
   // HUD léger
   _drawRaceHUD();
