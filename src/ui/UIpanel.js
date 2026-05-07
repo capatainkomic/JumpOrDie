@@ -339,45 +339,52 @@ class UIPanel {
   // ─────────────────────────────────────────────
   // PHASE 2 — Training
   // ─────────────────────────────────────────────
-  showTraining(startDiff, onReset) {
+  showTraining(startDiff, callbacks = {}) {
     this._phase     = 'training';
     this._startDiff = startDiff || 'easy';
-    this._onReset   = onReset;
+
+    // POURQUOI : on stocke les callbacks au lieu d acceder a trainingManager
+    // directement. UIPanel ne sait plus que trainingManager existe.
+    this._cb = {
+      onStop   : callbacks.onStop    || (() => {}),
+      onResume : callbacks.onResume  || (() => {}),
+      onSave   : callbacks.onSave    || null,
+      onReset  : callbacks.onReset   || null,
+      onMenu   : callbacks.onMenu    || (() => { gm.reset(); gm.goToMenu(); this.clear(); }),
+      getAgents: callbacks.getAgents || null,
+    };
+
     this._clear();
 
     const overlay = select('#config-overlay');
     if (overlay) overlay.style('display', 'none');
 
-    // ── Panel gauche ──────────────────────────
+    // Panel gauche
     const L = select('#ui-left');
     this.showPanel('left');
 
-    // Stats
     const h2s = createElement('h2', 'STATS');
     h2s.class('h-purple'); h2s.parent(L); this._els.push(h2s);
     const statCard = createElement('div');
     statCard.class('panel-card'); statCard.id('hud-stats'); statCard.parent(L);
     this._els.push(statCard);
 
-    // Progression
     const h2p = createElement('h2', 'PROGRESSION');
     h2p.class('h-green'); h2p.parent(L); this._els.push(h2p);
     const progCard = createElement('div');
     progCard.class('panel-card'); progCard.id('hud-prog'); progCard.parent(L);
     this._els.push(progCard);
 
-    // Config résumé
     const h2c = createElement('h2', 'CONFIG');
     h2c.class('h-blue'); h2c.parent(L); this._els.push(h2c);
     const cfgCard = createElement('div');
     cfgCard.class('panel-card'); cfgCard.id('hud-cfg'); cfgCard.parent(L);
     this._els.push(cfgCard);
 
-    // ── Panel droit ───────────────────────────
+    // Panel droit
     const R = select('#ui-right');
     this.showPanel('right');
 
-    // Groupe simulation — grille 2×2 boutons carrés
     const h2r = createElement('h2', 'CONTRÔLES');
     h2r.class('h-pink'); h2r.parent(R); this._els.push(h2r);
 
@@ -387,19 +394,18 @@ class UIPanel {
     const grid = createElement('div');
     grid.class('btn-grid'); grid.parent(grpSim); this._els.push(grid);
 
-    this._btnSquare(grid, '⏸', 'PAUSE',    'btn-square btn-stop',   () => trainingManager?.stop());
-    this._btnSquare(grid, '▶', 'RUN',      'btn-square btn-resume', () => trainingManager?.resume());
-    this._btnSquare(grid, '💾', 'SAVE',    'btn-square btn-save',   () => this._saveBrain());
-    this._btnSquare(grid, '📤', 'EXPORT',  'btn-square btn-export', () => BrainStorage.exportJSON());
+    // Boutons via callbacks — plus d acces direct a trainingManager
+    this._btnSquare(grid, '⏸', 'PAUSE',   'btn-square btn-stop',   () => this._cb.onStop());
+    this._btnSquare(grid, '▶', 'RUN',     'btn-square btn-resume', () => this._cb.onResume());
+    this._btnSquare(grid, '💾', 'SAVE',   'btn-square btn-save',   () => this._saveBrain());
+    this._btnSquare(grid, '📤', 'EXPORT', 'btn-square btn-export', () => BrainStorage.exportJSON());
 
-    // Navigation
     const grpNav = createElement('div');
     grpNav.class('panel-card'); grpNav.style('gap','4px'); grpNav.parent(R); this._els.push(grpNav);
-    this._btn2(grpNav, '⚙ RECONFIGURER','Changer les paramètres',  'btn-newcfg', () => { if (this._onReset) this._onReset(); });
-    this._btn2(grpNav, 'MENU',        '', 'btn-menu',   () => {
-      if (typeof trainingManager !== 'undefined') trainingManager = null;
-      gm.reset(); gm.goToMenu(); this.clear();
-    });
+    this._btn2(grpNav, '⚙ RECONFIGURER', 'Changer les paramètres', 'btn-newcfg',
+      () => { if (this._cb.onReset) this._cb.onReset(); });
+    this._btn2(grpNav, 'MENU', '', 'btn-menu',
+      () => this._cb.onMenu());
 
     this._refreshCfgDisplay();
   }
@@ -518,22 +524,26 @@ class UIPanel {
    
 
   _saveBrain() {
-    if (!trainingManager?.population) return;
-    const best = trainingManager.population.bestAgent;
-    const s    = trainingManager.stats;
-    BrainStorage.save(best.brain, {
-      generation : s.generation,
-      difficulty : s.difficulty,
-      bestFitness: s.bestFitness,
+    if (!this._cb?.onSave) return;
+    const result = this._cb.onSave();
+    if (!result) return;
+    BrainStorage.save(result.brain, {
+      generation : result.generation,
+      difficulty : result.difficulty,
+      bestFitness: result.bestFitness,
     });
-    alert(`✅ Sauvegardé !\nGén: ${s.generation} | Fitness: ${Math.round(s.bestFitness)}`);
+    alert(`✅ Sauvegardé !\nGén: ${result.generation} | Fitness: ${Math.round(result.bestFitness)}`);
   }
 
   onCanvasClick(mx, my, camera) {
-    if (!this.debugSteering || !trainingManager?.population) return;
+    // POURQUOI : on utilisait trainingManager.population.agents directement.
+    // Maintenant on passe par getAgents() fourni par sketch.js.
+    if (!this.debugSteering || !this._cb?.getAgents) return;
+    const agents = this._cb.getAgents();
+    if (!agents) return;
     const w = camera.screenToWorld(mx, my);
     let closest = null, minD = 20;
-    for (const a of trainingManager.population.agents) {
+    for (const a of agents) {
       if (a.isDead) continue;
       const d = dist(w.x, w.y, a.x, a.y);
       if (d < minD) { minD = d; closest = a; }

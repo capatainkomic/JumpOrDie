@@ -503,7 +503,7 @@ function mousePressed() {
         gm.reset();
         trainingManager = new TrainingManager(tileMap, levelGenerator);
         gm.goToTraining();
-        uiPanel.showTraining(startDiff, _onReset);
+        uiPanel.showTraining(startDiff, _trainingCallbacks());
       });
     }
 
@@ -553,6 +553,31 @@ function mousePressed() {
   inputManager.onClick(camera);
 }
 
+// ── Callbacks training ────────────────────────
+// POURQUOI : centralisé ici pour que UIPanel n'ait pas besoin
+// de connaitre trainingManager. Sketch.js fournit les actions,
+// UIPanel les appelle sans savoir d'ou elles viennent.
+function _trainingCallbacks() {
+  return {
+    onStop   : () => trainingManager?.stop(),
+    onResume : () => trainingManager?.resume(),
+    onSave   : () => {
+      if (!trainingManager?.population?.bestAgent) return null;
+      const best = trainingManager.population.bestAgent;
+      const s    = trainingManager.stats;
+      return {
+        brain      : best.brain,
+        generation : s.generation,
+        difficulty : s.difficulty,
+        bestFitness: s.bestFitness,
+      };
+    },
+    onReset  : () => _onReset(),
+    onMenu   : () => { trainingManager = null; gm.reset(); gm.goToMenu(); uiPanel.clear(); },
+    getAgents: () => trainingManager?.population?.agents || null,
+  };
+}
+
 // ── RESET callback ────────────────────────────
 function _onReset() {
   trainingManager = null;
@@ -562,7 +587,7 @@ function _onReset() {
     gm.reset();
     trainingManager = new TrainingManager(tileMap, levelGenerator);
     gm.goToTraining();
-    uiPanel.showTraining(startDiff, _onReset);
+    uiPanel.showTraining(startDiff, _trainingCallbacks());
   });
 }
 
