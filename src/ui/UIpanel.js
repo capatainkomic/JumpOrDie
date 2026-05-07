@@ -398,7 +398,7 @@ class UIPanel {
     this._btn2(grpNav, '⚙ RECONFIGURER','Changer les paramètres',  'btn-newcfg', () => { if (this._onReset) this._onReset(); });
     this._btn2(grpNav, 'MENU',        '', 'btn-menu',   () => {
       if (typeof trainingManager !== 'undefined') trainingManager = null;
-      gm.reset(); appState = 'menu'; this.clear();
+      gm.reset(); gm.goToMenu(); this.clear();
     });
 
     this._refreshCfgDisplay();
@@ -624,7 +624,7 @@ class UIPanel {
     menuBtn.class('btn-menu'); menuBtn.parent(R);
     menuBtn.mousePressed(() => {
       cm.reset();
-      appState = 'menu';
+      gm.goToMenu();
       this.clear();
     });
     this._els.push(menuBtn);
@@ -674,7 +674,7 @@ class UIPanel {
       this._phase = 'none';
     });
     this._btn2(nav, '🏠 MENU',     'Retour à l\'écran titre', 'btn-menu',   () => {
-      cm.reset(); appState = 'menu'; this.clear();
+      cm.reset(); gm.goToMenu(); this.clear();
     });
   }
 

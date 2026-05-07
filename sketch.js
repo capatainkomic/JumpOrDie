@@ -21,7 +21,7 @@ let tileMap;
 let levelGenerator;
 let trainingManager;
 let uiPanel;
-let appState = 'menu';
+// Navigation centralisée dans gm.appState
 
 // ── Assets ────────────────────────────────────
 let bgImg;
@@ -59,7 +59,7 @@ function setup() {
 function draw() {
   background(91, 200, 245);
 
-  switch (appState) {
+  switch (gm.appState) {
     case 'menu':        _drawMenu();        break;
     case 'config':      _drawConfig();      break;
     case 'training':    _drawTraining();    break;
@@ -492,17 +492,17 @@ function mousePressed() {
     }
   }
 
-  if (appState === 'menu') {
+  if (gm.isMenu()) {
     const cx = CANVAS_W / 2;
 
     // Bouton ENTRAÎNEMENT
     if (mouseX > cx-130 && mouseX < cx+130 &&
         mouseY > 198   && mouseY < 242) {
-      appState = 'config';
+      gm.goToConfig();
       uiPanel.showConfig((startDiff) => {
         gm.reset();
         trainingManager = new TrainingManager(tileMap, levelGenerator);
-        appState = 'training';
+        gm.goToTraining();
         uiPanel.showTraining(startDiff, _onReset);
       });
     }
@@ -510,7 +510,7 @@ function mousePressed() {
     // Bouton COMPÉTITION
     if (mouseX > cx-130 && mouseX < cx+130 &&
         mouseY > 253   && mouseY < 297) {
-      appState = 'competition';
+      gm.goToCompetition();
       competitionManager.reset();
       uiPanel._phase = 'menu';
     }
@@ -518,7 +518,7 @@ function mousePressed() {
   }
 
   // Clics slots compétition — phase setup
-  if (appState === 'competition' && competitionManager.phase === 'setup') {
+  if (gm.isCompetition() && competitionManager.phase === 'setup') {
     const slotW  = 200, slotH = 100;
     const totalW = slotW * 3 + 20 * 2;
     const startX = CANVAS_W / 2 - totalW / 2;
@@ -545,7 +545,7 @@ function mousePressed() {
   }
 
   // Debug steering — sélection agent au clic
-  if (appState === 'training' && uiPanel.debugSteering) {
+  if (gm.isTraining() && uiPanel.debugSteering) {
     uiPanel.onCanvasClick(mouseX, mouseY, camera);
     return;
   }
@@ -557,11 +557,11 @@ function mousePressed() {
 function _onReset() {
   trainingManager = null;
   gm.reset();
-  appState = 'config';
+  gm.goToConfig();
   uiPanel.showConfig((startDiff) => {
     gm.reset();
     trainingManager = new TrainingManager(tileMap, levelGenerator);
-    appState = 'training';
+    gm.goToTraining();
     uiPanel.showTraining(startDiff, _onReset);
   });
 }
@@ -685,7 +685,7 @@ function keyPressed() {
   if (keyCode === ESCAPE) {
     trainingManager = null;
     gm.reset();
-    appState = 'menu';
+    gm.goToMenu();
     uiPanel.clear();
   }
 }
