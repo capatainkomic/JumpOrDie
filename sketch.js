@@ -65,7 +65,7 @@ function draw() {
     case 'competition': _drawCompetition(); break;
   }
 
-  _drawFPS();
+
 }
 
 // ── MENU ──────────────────────────────────────
@@ -80,20 +80,14 @@ function draw() {
 // ── COMPETITION ───────────────────────────────
 function _drawCompetition() {
   if (competitionManager.phase === 'setup') {
+    // Panel droit — créé une seule fois via UIPanel
+    uiPanel.showCompetitionSetup(competitionManager);
     _drawCompetitionSetup();
   } else {
     _drawCompetitionRace();
   }
 }
 
-// ── FPS ───────────────────────────────────────
-function _drawFPS() {
-  fill(255, 255, 255, 100);
-  noStroke();
-  textSize(9);
-  textAlign(RIGHT, TOP);
-  text(`${Math.round(frameRate())} fps`, CANVAS_W - 6, 6);
-}
 
 // ── MOUSE ─────────────────────────────────────
 function mousePressed() {
@@ -162,12 +156,6 @@ function mousePressed() {
     return;
   }
 
-  // Debug steering — sélection agent au clic
-  if (gm.isTraining() && uiPanel.debugSteering) {
-    uiPanel.onCanvasClick(mouseX, mouseY, camera);
-    return;
-  }
-
   inputManager.onClick(camera);
 }
 
@@ -214,7 +202,15 @@ function _onReset() {
 // ── KEYS ──────────────────────────────────────
 function keyPressed() {
   if (keyCode === ESCAPE) {
+    // Nettoyer l overlay des cards competition si présent
+    if (typeof _cardOverlay !== 'undefined' && _cardOverlay) {
+      _cardOverlay.remove(); _cardOverlay = null;
+    }
+
+    if (typeof _lastSlotsState !== 'undefined') _lastSlotsState = null;
+    
     trainingManager = null;
+    competitionManager.reset();
     gm.reset();
     gm.goToMenu();
     uiPanel.clear();

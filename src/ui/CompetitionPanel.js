@@ -14,7 +14,7 @@ UIPanel.prototype.showCompetitionSetup = function(cm) {
     const R = select('#ui-right');
     this.showPanel('right');
 
-    const h2 = createElement('h2', '🌍 NIVEAU');
+    const h2 = createElement('h2', 'NIVEAU');
     h2.class('h-green'); h2.parent(R); this._els.push(h2);
 
     const diffCard = createElement('div');
@@ -28,7 +28,7 @@ UIPanel.prototype.showCompetitionSetup = function(cm) {
     ['easy','medium','hard','killer'].forEach(d => sel.option(d));
     sel.selected('easy'); sel.parent(diffCard); this._els.push(sel);
 
-    const genBtn = createButton('🎲 GÉNÉRER NIVEAU');
+    const genBtn = createButton('GÉNÉRER NIVEAU');
     genBtn.class('btn-export'); genBtn.parent(diffCard);
     genBtn.mousePressed(() => cm.generateLevel(sel.value()));
     this._els.push(genBtn);
@@ -43,6 +43,9 @@ UIPanel.prototype.showCompetitionSetup = function(cm) {
       if (!cm.level) cm.generateLevel(sel.value());
       cm.startRace();
       this._phase = 'comp-race';
+      if (typeof _cardOverlay !== 'undefined' && _cardOverlay) {
+        _cardOverlay.remove(); _cardOverlay = null; _lastSlotsState = null;
+      }
       this._clear();
       this.hidePanels();
       this._showRacePanels(cm);
@@ -51,12 +54,13 @@ UIPanel.prototype.showCompetitionSetup = function(cm) {
 
     const sepMenu = createElement('hr'); sepMenu.class('sep'); sepMenu.parent(R); this._els.push(sepMenu);
 
-    const menuBtn = createButton('🏠 MENU');
+    const menuBtn = createButton('MENU');
     menuBtn.class('btn-menu'); menuBtn.parent(R);
     menuBtn.mousePressed(() => {
       cm.reset();
       gm.goToMenu();
       this.clear();
+      if(typeof _cardOverlay!=="undefined"&&_cardOverlay){_cardOverlay.remove();_cardOverlay=null;_lastSlotsState=null;}
     });
     this._els.push(menuBtn);
   }
@@ -75,7 +79,7 @@ UIPanel.prototype._showRacePanels = function(cm) {
     const R = select('#ui-right');
     this.showPanel('right');
 
-    const h2r = createElement('h2', '🎮 CONTRÔLES');
+    const h2r = createElement('h2', 'CONTRÔLES');
     h2r.class('h-purple'); h2r.parent(R); this._els.push(h2r);
 
     const ctrlCard = createElement('div');
@@ -90,19 +94,28 @@ UIPanel.prototype._showRacePanels = function(cm) {
     const nav = createElement('div');
     nav.class('panel-card'); nav.style('gap','4px'); nav.parent(R); this._els.push(nav);
 
-    this._btn2(nav, '🔄 REJOUER',  'Relancer même cerveaux',  'btn-save',   () => {
+    this._btn2(nav, '⟳ REJOUER',  'Relancer la partie',  'btn-save',   () => {
       cm.startRace();
       this._phase = 'comp-race';
+      if (typeof _cardOverlay !== 'undefined' && _cardOverlay) {
+        _cardOverlay.remove(); _cardOverlay = null; _lastSlotsState = null;
+      }
       this._clear();
       this.hidePanels();
       this._showRacePanels(cm);
     });
+
     this._btn2(nav, '⚙ CHANGER',  'Changer les cerveaux',    'btn-newcfg', () => {
       cm.reset();
+      this.hidePanels();
       this._phase = 'none';
     });
-    this._btn2(nav, '🏠 MENU',     'Retour à l\'écran titre', 'btn-menu',   () => {
-      cm.reset(); gm.goToMenu(); this.clear();
+
+    this._btn2(nav, ' MENU',     '', 'btn-menu',   () => {
+      cm.reset(); 
+      gm.goToMenu(); 
+      this.clear(); 
+      if(typeof _cardOverlay!=="undefined"&&_cardOverlay){_cardOverlay.remove();_cardOverlay=null;_lastSlotsState=null;}
     });
   }
 
@@ -118,7 +131,7 @@ UIPanel.prototype.updateRaceHUD = function(stats) {
       html += `
         <div class="stat-row" style="border-left:3px solid ${colorsHex[s.index]||'#888'};padding-left:5px;">
           <span class="stat-lbl">${medals[rank]||''} ${s.label}</span>
-          <span class="stat-val ${s.isDead?'v-pink':'v-green'}">${s.isDead?'💀':'🟢'}</span>
+          <span class="stat-val ${s.isDead?'v-pink':'v-green'}">${s.isDead?'💀':'♥️'}</span>
         </div>
         <div class="stat-row">
           <span class="stat-lbl">Distance</span>

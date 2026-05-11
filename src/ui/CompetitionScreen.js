@@ -59,96 +59,217 @@ function _drawCompetitionGame(cm, camera) {
 
 
 function _drawCompetitionSetup() {
-  uiPanel.showCompetitionSetup(competitionManager);
-
-  // Background
+  // Fond derrière les cards
   background(91, 200, 245);
-  if (bgImg) { imageMode(CORNER); image(bgImg, 0, 0, CANVAS_W, CANVAS_H); }
+  if (typeof bgImg !== 'undefined' && bgImg) {
+    imageMode(CORNER);
+    image(bgImg, 0, 0, CANVAS_W, CANVAS_H);
+  }
   noStroke(); fill(5, 12, 30, 100); rect(0, 0, CANVAS_W, CANVAS_H);
 
   // Titre
-  fill(245, 200, 66);
+  fill(255, 255, 255, 220);
   textFont('Press Start 2P');
-  textSize(10); textAlign(CENTER, TOP);
-  text('🏆 SÉLECTION DES CERVEAUX', CANVAS_W/2, 12);
+  textSize(8); textAlign(CENTER, TOP);
+  text('SELECTION DES CERVEAUX', CANVAS_W/2, 10);
 
-  // 3 slots
-  const slotW = 200, slotH = 100;
-  const totalW = slotW * 3 + 20 * 2;
-  const startX = CANVAS_W/2 - totalW/2;
-  const slotY  = 60;
-
-  const skins    = ['🦊 Fox', '🐰 Bunny', '🐿 Squirrel'];
-  const slotCols = [[255,150,50],[120,200,255],[180,220,80]];
-
-  for (let i = 0; i < 3; i++) {
-    const sx = startX + i * (slotW + 20);
-    const entry = competitionManager.slots[i];
-    const col   = slotCols[i];
-
-    // Fond carte
-    fill(10, 15, 35, 200);
-    stroke(col[0], col[1], col[2], 120);
-    strokeWeight(2);
-    rect(sx, slotY, slotW, slotH, 8);
-
-    // Titre skin
-    noStroke(); fill(col[0], col[1], col[2]);
-    textFont('Press Start 2P'); textSize(7);
-    textAlign(CENTER, TOP);
-    text(skins[i], sx + slotW/2, slotY + 10);
-
-    // Sprite idle animé à gauche du slot
-    const idleAgent = competitionManager._idleAgents[i];
-    if (idleAgent) {
-      idleAgent.drawIdle(sx + 28, slotY + 58, 40, 40);
-    }
-
-    if (entry) {
-      // Cerveau chargé
-      fill(255); textFont('VT323'); textSize(13);
-      textAlign(LEFT, TOP);
-      text(entry.name || 'Cerveau', sx + 55, slotY + 28);
-      fill(180); textSize(11);
-      text(`Gen: ${entry.generation || '?'}`, sx + 55, slotY + 44);
-      text(`Fit: ${entry.bestFitness || '?'}`, sx + 55, slotY + 58);
-      fill(100, 220, 100); textSize(11);
-      textAlign(CENTER, TOP);
-      text('✓ Prêt', sx + slotW/2, slotY + 76);
-    } else {
-      fill(100); textFont('VT323'); textSize(12);
-      textAlign(CENTER, CENTER);
-      text('Cliquez pour\ncharger un cerveau', sx + slotW/2, slotY + 60);
-    }
-
-    // Bouton charger/retirer (zone de clic gérée dans mousePressed)
-    const btnY = slotY + slotH + 5;
-    const btnW = slotW - 20, btnH = 22;
-    const bx   = sx + 10;
-
-    if (entry) {
-      fill(180, 50, 50, 200); noStroke();
-    } else {
-      fill(col[0], col[1], col[2], 200); noStroke();
-    }
-    rect(bx, btnY, btnW, btnH, 5);
-
-    fill(255); textFont('Press Start 2P'); textSize(6);
-    textAlign(CENTER, CENTER);
-    text(entry ? '✕ RETIRER' : '📂 CHARGER', bx + btnW/2, btnY + btnH/2);
-  }
-
-  // Message si niveau généré
-  if (competitionManager.level) {
-    fill(100, 220, 100, 200);
-    textFont('VT323'); textSize(13); textAlign(CENTER, BOTTOM);
-    text('✓ Niveau prêt — cliquez START dans le panel droit', CANVAS_W/2, CANVAS_H - 8);
-  } else {
-    fill(200, 180, 100, 180);
-    textFont('VT323'); textSize(12); textAlign(CENTER, BOTTOM);
-    text('Générez un niveau depuis le panel droit', CANVAS_W/2, CANVAS_H - 8);
-  }
+  // Animer les sprites idle dans les zones de cards
+  // Les cards HTML sont gérées par _updateCompetitionCards()
+  _updateCompetitionCards();
 }
+
+// Cards HTML pour les slots — recréées seulement si état a changé
+let _cardOverlay = null;
+let _lastSlotsState = null;
+
+function _updateCompetitionCards() {
+  const cm = competitionManager;
+
+  // Sérialiser l'état des slots pour détecter un changement
+  const state = cm.slots.map(s => s ? s.name : null).join('|');
+  if (state === _lastSlotsState && _cardOverlay) {
+    // Pas de changement — juste animer les sprites
+      return;
+  }
+  _lastSlotsState = state;
+
+  // Supprimer l'overlay précédent
+  if (_cardOverlay) { _cardOverlay.remove(); _cardOverlay = null; }
+
+  const skins  = ['fox', 'bunny', 'squirrel'];
+  const labels = ['Fox', 'Bunny', 'Squirrel'];
+  const topBgs = ['#fff5eb', '#eef5ff', '#edfaf3'];
+  const avatarBgs = ['#fde8cc', '#d6e8ff', '#c8f0dc'];
+  const emojis = ['🦊', '🐰', '🐿️'];
+  const slotColors = ['#FF9632', '#78C8FF', '#B4DC50'];
+
+  const container = document.querySelector('#canvas-container');
+  if (!container) return;
+
+  const overlay = document.createElement('div');
+
+  overlay.style.cssText = [
+    'position:absolute',
+    'top:0', 'left:0', 'width:100%', 'height:100%',
+    'pointer-events:none',
+    'z-index:5',
+    'display:flex',
+    'flex-direction:column',
+    'align-items:center',
+    'justify-content:center',
+    'padding:30px 16px 16px',
+    'box-sizing:border-box',
+    'gap:0',
+  ].join(';');
+
+  // Grille des 3 cards
+  const grid = document.createElement('div');
+  grid.style.cssText = [
+    'display:grid',
+    'grid-template-columns:repeat(3,1fr)',
+    'gap:12px',
+    'width:100%',
+    'pointer-events:auto',
+  ].join(';');
+
+  skins.forEach((skin, i) => {
+    const entry = cm.slots[i];
+    const card  = document.createElement('div');
+    card.style.cssText = [
+      'background:rgba(255,255,255,0.96)',
+      'border:0.5px solid rgba(0,0,0,0.12)',
+      'border-radius:12px',
+      'overflow:hidden',
+      'display:flex',
+      'flex-direction:column',
+      'font-family:Nunito,sans-serif',
+    ].join(';');
+
+    // Top — zone sprite (sera dessinée sur le canvas par p5.js par dessus)
+    const top = document.createElement('div');
+    top.id = `slot-top-${i}`;
+    top.style.cssText = [
+      'height:80px',
+      `background:${topBgs[i]}`,
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'position:relative',
+    ].join(';');
+
+    // Avatar emoji (placeholder — le sprite p5.js sera dessiné par dessus)
+    const avatar = document.createElement('div');
+    avatar.style.cssText = [
+      'width:64px', 'height:64px',
+      'border-radius:50%',
+      `background:${avatarBgs[i]}`,
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'font-size:36px',
+    ].join(';');
+    avatar.textContent = emojis[i];
+    top.appendChild(avatar);
+
+    // Badge "Prêt" si cerveau chargé
+    if (entry) {
+      const badge = document.createElement('div');
+      badge.style.cssText = [
+        'position:absolute', 'top:8px', 'right:8px',
+        'background:#e8f9f0', 'color:#0a7a4b',
+        'font-size:8px', 'font-weight:700',
+        'padding:2px 6px', 'border-radius:20px',
+        'border:0.5px solid #9fe1cb',
+        'font-family:Nunito,sans-serif',
+      ].join(';');
+      badge.textContent = '✓ Prêt';
+      top.appendChild(badge);
+    }
+    card.appendChild(top);
+
+    // Body
+    const body = document.createElement('div');
+    body.style.cssText = 'padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:6px;';
+
+    const nameRow = document.createElement('div');
+    nameRow.innerHTML = `<p style="font-size:12px;font-weight:700;color:#111;margin:0;">${labels[i]}</p>` +
+      (entry ? `<p style="font-size:10px;color:#888;margin:0;">${entry.name || 'Cerveau'}</p>` : '');
+    body.appendChild(nameRow);
+
+    if (entry) {
+      const stats = document.createElement('div');
+      stats.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:4px;';
+      const mkStat = (lbl, val) => {
+        const d = document.createElement('div');
+        d.style.cssText = 'background:#f7f7f9;border-radius:6px;padding:4px 6px;';
+        d.innerHTML = `<p style="font-size:8px;color:#aaa;text-transform:uppercase;letter-spacing:0.3px;margin:0;">${lbl}</p>`
+                    + `<p style="font-size:11px;font-weight:700;color:#222;margin:0;">${val}</p>`;
+        return d;
+      };
+      stats.appendChild(mkStat('Fitness',    Math.round(entry.bestFitness || 0).toLocaleString()));
+      stats.appendChild(mkStat('Générations', entry.generation || '?'));
+      stats.appendChild(mkStat('Inputs',     entry.inputCount || '?'));
+      stats.appendChild(mkStat('Réseau',     (entry.hiddenLayers||'?') + '×' + (entry.neuronsPerLayer||'?')));
+      body.appendChild(stats);
+    } else {
+      const hint = document.createElement('div');
+      hint.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:10px;';
+      hint.textContent = 'Aucun cerveau chargé';
+      body.appendChild(hint);
+    }
+    card.appendChild(body);
+
+    // Footer — bouton
+    const footer = document.createElement('div');
+    footer.style.cssText = 'padding:0 12px 12px;';
+
+    const btn = document.createElement('button');
+    const isLoaded = !!entry;
+    btn.style.cssText = [
+      'width:100%', 'padding:7px',
+      'border-radius:7px',
+      'font-size:10px', 'font-weight:700',
+      'cursor:pointer',
+      'font-family:Nunito,sans-serif',
+      'letter-spacing:0.3px',
+      'transition:background 0.12s,transform 0.08s,box-shadow 0.1s',
+      isLoaded
+        ? 'background:#fff0f0;color:#c0392b;border:0.5px solid rgba(192,57,43,0.25);'
+        : 'background:#fff;color:#333;border:0.5px solid rgba(0,0,0,0.15);',
+    ].join(';');
+
+    btn.textContent = isLoaded ? '✕ Retirer' : '+ Charger un cerveau';
+
+    btn.onmouseenter = () => {
+      btn.style.background = isLoaded ? '#ffe4e4' : '#f0f0f4';
+      btn.style.boxShadow  = '0 2px 8px rgba(0,0,0,0.1)';
+    };
+    btn.onmouseleave = () => {
+      btn.style.background = isLoaded ? '#fff0f0' : '#fff';
+      btn.style.boxShadow  = 'none';
+    };
+    btn.onmousedown  = () => { btn.style.transform = 'scale(0.97)'; };
+    btn.onmouseup    = () => { btn.style.transform = 'scale(1)'; };
+
+    btn.onclick = () => {
+      if (isLoaded) {
+        cm.unloadBrain(i);
+        _lastSlotsState = null; // forcer rebuild
+      } else {
+        _openBrainSelector(i);
+      }
+    };
+
+    footer.appendChild(btn);
+    card.appendChild(footer);
+    grid.appendChild(card);
+  });
+
+  overlay.appendChild(grid);
+  container.appendChild(overlay);
+  _cardOverlay = overlay;
+}
+
+
+
 
 function _drawCompetitionRace() {
   // Background
@@ -157,9 +278,6 @@ function _drawCompetitionRace() {
   // Update + draw (parallax intégré dans draw)
   competitionManager.update();
   _drawCompetitionGame(competitionManager, camera);
-
-  // HUD léger
-  _drawRaceHUD();
 
   // Panel gauche — stats agents
   uiPanel.updateRaceHUD(competitionManager.raceStats);
@@ -170,21 +288,6 @@ function _drawCompetitionRace() {
   }
 }
 
-function _drawRaceHUD() {
-  // Timer
-  const frames  = competitionManager._sessionFrames;
-  const seconds = Math.floor(frames / 60);
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  const timeStr = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-  fill(255, 255, 255, 180);
-  noStroke();
-  textFont('VT323');
-  textSize(14);
-  textAlign(RIGHT, TOP);
-  text(`⏱ ${timeStr}`, CANVAS_W - 8, 8);
-}
 
 function _drawRaceFinished() {
   // Overlay fin de course
@@ -217,10 +320,9 @@ function _openBrainSelector(slotIndex) {
   }
 
   const skinNames  = ['Fox', 'Bunny', 'Squirrel'];
-  const skinEmojis = ['🦊', '🐰', '🐿'];
+  const skinEmojis = ['🦊', '🐰', '🐿️'];
   const slotColors = ['#FF9632', '#78C8FF', '#B4DC50'];
   const slotColor  = slotColors[slotIndex] || '#7C6EEB';
-  const skinLabel  = skinEmojis[slotIndex] + ' ' + skinNames[slotIndex];
 
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;display:flex;align-items:center;justify-content:center;';
@@ -246,15 +348,11 @@ function _openBrainSelector(slotIndex) {
 
   // Header
   const header = document.createElement('div');
-  header.style.cssText = 'padding:16px 20px 14px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;';
+  header.style.cssText = 'padding:16px 20px 14px;border-bottom:0.5px solid rgba(0,0,0,0.08);flex-shrink:0;';
   header.innerHTML =
-    '<div>' +
-      '<p style="font-size:12px;color:#888;margin:0 0 2px;">Slot ' + (slotIndex+1) + ' &nbsp;—&nbsp; <span style="color:' + slotColor + ';font-weight:700;">' + skinLabel + '</span></p>' +
-      '<p style="font-size:17px;font-weight:700;margin:0;color:#111;">Choisir un cerveau</p>' +
-    '</div>' +
-    '<button id="close-popup" style="background:none;border:none;cursor:pointer;font-size:18px;color:#aaa;padding:2px 4px;line-height:1;">✕</button>';
+    '<p style="font-size:12px;color:#888;margin:0 0 2px;text-align:center;">' + ' &nbsp;&nbsp; <span style="color:' + slotColor + ';font-weight:700;">' + skinNames[slotIndex] + '</span></p>' +
+    '<p style="font-size:17px;font-weight:700;margin:0;color:#111;text-align:center;">Choisir un cerveau</p>';
   popup.appendChild(header);
-  header.querySelector('#close-popup').onclick = close;
 
   // Liste
   const list = document.createElement('div');
