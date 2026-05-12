@@ -1,16 +1,3 @@
-// ==============================================
-// Population.js
-//
-// Gère les N agents qui jouent simultanément.
-// Chaque agent a son propre cerveau (NeuralNetwork).
-//
-// Responsabilités :
-//   - Créer les agents avec cerveaux aléatoires
-//   - Mettre à jour tous les agents chaque frame
-//   - Appliquer la séparation (steering behaviour)
-//   - Exposer les stats (aliveCount, bestAgent)
-// ==============================================
-
 class Population {
 
   constructor(size, startX, startY) {
@@ -47,8 +34,6 @@ class Population {
   }
 
   // ── Mise à jour de tous les agents ───────────
-  // surfaces : { grounds, platforms, gaps }
-  // level    : instance Level (pour Sensors)
   update(surfaces, level) {
     for (const agent of this.agents) {
       if (agent.isDead) continue;
@@ -84,8 +69,7 @@ class Population {
     return this.agents.filter(a => !a.isDead).length;
   }
 
-  // ── Meilleur agent absolu (fitness max) ─────
-  // Utilisé par GeneticAlgorithm — mort ou vivant
+  // ── Meilleur agent absolu (fitness max) : Utilisé par GeneticAlgorithm — mort ou vivant ─────
   get bestAgent() {
     return this.agents.reduce((best, a) =>
       a.fitness > best.fitness ? a : best
@@ -93,7 +77,6 @@ class Population {
   }
 
   // ── Meilleur agent vivant (pour la caméra) ───
-  // Evite que la caméra reste figée sur un mort
   get bestLiveAgent() {
     const alive = this.agents.filter(a => !a.isDead);
     if (alive.length === 0) return this.bestAgent;

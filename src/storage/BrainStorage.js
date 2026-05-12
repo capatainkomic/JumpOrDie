@@ -1,27 +1,3 @@
-// ==============================================
-// BrainStorage.js
-//
-// Gestion save/load des cerveaux entraînés.
-//
-// STRATÉGIE :
-//   - Stockage local  : localStorage (persistant)
-//   - Export          : téléchargement JSON
-//   - Import          : chargement fichier JSON
-//
-// FORMAT JSON :
-//   {
-//     "brains": [
-//       {
-//         name, savedAt, generation, difficulty,
-//         bestFitness, inputCount, hiddenLayers,
-//         neuronsPerLayer, activationFn,
-//         weights, biases
-//       },
-//       ...
-//     ]
-//   }
-// ==============================================
-
 class BrainStorage {
 
   static STORAGE_KEY = 'jumpOrDie_brains';
@@ -68,7 +44,6 @@ class BrainStorage {
   }
 
   // ── Charger tous les cerveaux ────────────────
-  // Retourne un tableau d'entrées ou [] si vide
   static loadAll() {
     try {
       const raw = localStorage.getItem(BrainStorage.STORAGE_KEY);
@@ -105,7 +80,6 @@ class BrainStorage {
   }
 
   // ── Exporter tous les cerveaux en JSON ───────
-  // Déclenche un téléchargement dans le navigateur
   static exportJSON() {
     const all  = BrainStorage.loadAll();
     if (all.length === 0) {
@@ -126,7 +100,6 @@ class BrainStorage {
   }
 
   // ── Importer des cerveaux depuis un fichier JSON ──
-  // onSuccess(brains) : callback avec le tableau importé
   static importJSON(onSuccess) {
     const input    = document.createElement('input');
     input.type     = 'file';

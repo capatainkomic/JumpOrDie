@@ -14,19 +14,16 @@ class CompetitionAgent extends Agent {
       path     : 'assets/characters/fox_player/',
       run      : { prefix: 'run/player-run-',   count: 6, ext: '.png', w: 32, h: 32 },
       jump     : { prefix: 'jump/player-jump-',  count: 2, ext: '.png', w: 32, h: 32 },
-      idle     : { prefix: 'idle/player-idle-',  count: 4, ext: '.png', w: 32, h: 32 },
     },
     bunny: {
       path     : 'assets/characters/bunny_player/',
       run      : { prefix: 'run/player-run-',   count: 8, ext: '.png', w: 37, h: 32 },
       jump     : { prefix: 'jump/player-jump-',  count: 4, ext: '.png', w: 37, h: 32 },
-      idle     : { prefix: 'idle/player-idle-',  count: 9, ext: '.png', w: 37, h: 32 },
     },
     squirrel: {
       path     : 'assets/characters/squirel_player/',
       run      : { prefix: 'run/player-run-',   count: 6, ext: '.png', w: 90, h: 58 },
       jump     : { prefix: 'jump/player-jump-',  count: 4, ext: '.png', w: 90, h: 58 },
-      idle     : { prefix: 'idle/player-idle-',  count: 8, ext: '.png', w: 90, h: 58 },
     },
   };
 
@@ -39,7 +36,7 @@ class CompetitionAgent extends Agent {
     this.brainEntry = brainEntry; // métadonnées JSON
 
     // Frames chargées
-    this._frames = { run: [], jump: [], idle: [] };
+    this._frames = { run: [], jump: [] };
     this._loaded  = false;
 
     // Animation state
@@ -66,7 +63,6 @@ class CompetitionAgent extends Agent {
 
     load('run');
     load('jump');
-    load('idle');
     this._loaded = true;
   }
 
@@ -151,24 +147,6 @@ class CompetitionAgent extends Agent {
     pop();
   }
 
-  // ── Idle (pour la phase setup) ────────────
-  drawIdle(x, y, w, h) {
-    this._tickAnim();
-    const frames = this._frames.idle;
-    if (!frames.length) {
-      // Fallback
-      fill(200); noStroke();
-      ellipse(x, y, 30, 30);
-      return;
-    }
-    const idx = this._frameIndex % frames.length;
-    const img = frames[idx];
-    if (img) {
-      push();
-      imageMode(CENTER);
-      noTint();
-      image(img, x, y, w, h);
-      pop();
-    }
-  }
+  
+  
 }

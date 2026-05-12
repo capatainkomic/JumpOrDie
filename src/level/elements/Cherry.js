@@ -1,16 +1,3 @@
-// ==============================================
-// Cherry.js
-//
-// Collectible animé — séquence :
-//   assets/objects/cherry/cherry-1.png .. cherry-7.png
-//
-// Chaque cerise a un ID unique.
-// La collecte est trackée par agent (Set d'IDs)
-// et non plus sur la cerise elle-même —
-// ainsi plusieurs agents peuvent collecter
-// la même cerise indépendamment.
-// ==============================================
-
 class Cherry {
 
   static ANIM_RATE = 6;
@@ -56,8 +43,7 @@ class Cherry {
     }
   }
 
-  // ── Rendu ────────────────────────────────────
-  // La cerise reste visible pour tous les agents
+  // ── Rendu : La cerise reste visible pour tous les agents ──
   draw() {
     const img = Cherry.frames[this._frameIndex];
     if (img) image(img, this.left, this.top);

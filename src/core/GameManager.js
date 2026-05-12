@@ -1,12 +1,3 @@
-// ==============================================
-// GameManager.js — Singleton
-//
-// Responsabilités :
-//   1. Navigation centralisée (appState)
-//   2. Config entraînement
-//   3. Stats globales
-// ==============================================
-
 class GameManager {
 
   static STATES = {

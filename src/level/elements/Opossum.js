@@ -14,8 +14,6 @@ class Opossum extends Enemy {
     Opossum.frames = Enemy.loadFrames('opossum', 'opossum-', 6);
   }
  
-  // patrolLeft / patrolRight : bornes X de la patrouille en pixels
-  // AABB basée sur les constantes — pas sur le chargement async
   get w() { return Opossum.SPRITE_W; }
   get h() { return Opossum.SPRITE_H; }
 

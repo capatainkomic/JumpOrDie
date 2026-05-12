@@ -6,7 +6,7 @@ class Eagle extends Enemy {
   static SPRITE_W = 40;
   static SPRITE_H = 41;
  
-  // frames : Eagle.frames (chargés via preload)
+
   static frames = [];
  
   static preload() {

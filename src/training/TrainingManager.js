@@ -1,21 +1,3 @@
-// ==============================================
-// TrainingManager.js
-//
-// Orchestre le cycle d'entraînement — Option C hybride :
-//
-//   1. Générer niveau A (difficulté courante)
-//   2. S'entraîner jusqu'à condition atteinte
-//      → nouveau niveau même difficulté
-//      → levelsCompleted++
-//   3. Après levelsBeforeDifficulty niveaux réussis
-//      → difficulté suivante
-//   4. Si condition jamais atteinte après generationsPerLevel gens
-//      → nouveau niveau quand même (levelsCompleted inchangé)
-//   5. Arrêt si :
-//      → bouton stop (manuel)
-//      → difficulté killer + levelsBeforeDifficulty niveaux réussis
-// ==============================================
-
 class TrainingManager {
 
   static SESSION_TIMEOUT  = 60 * 30 * 2; // 2 minutes 

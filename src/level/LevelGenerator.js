@@ -1,6 +1,6 @@
 // ==============================================
 // LevelGenerator.js
-// Génération procédurale 100% tile-based cohérente
+// Génération procédurale
 // ==============================================
 
 class LevelGenerator {
@@ -130,7 +130,6 @@ class LevelGenerator {
   }
 
   // ── Génération d'un gap ──────────────────────
-  // Retourne la nouvelle valeur de curT
   _generateGap(elements, curT, rules, groundY, T, randT, px) {
     const gapT = randT(rules.gapMin, rules.gapMax);
 
@@ -144,7 +143,6 @@ class LevelGenerator {
   }
 
   // ── Génération d'une section de sol ─────────
-  // Retourne la nouvelle valeur de curT
   _generateGroundSection(elements, curT, rules, groundY, T, randT, px) {
     const groundT = randT(rules.groundMin, rules.groundMax);
     const groundX = px(curT);

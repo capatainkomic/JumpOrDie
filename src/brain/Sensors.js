@@ -1,19 +1,3 @@
-// ==============================================
-// Sensors.js
-//
-// Calcule les inputs du réseau de neurones.
-// 3 blocs :
-//   1. Grille spatiale (terrain devant l'agent)
-//   2. Forces Reynolds (seek/avoid normalisées)
-//   3. États internes (physique de l'agent)
-//
-// TOTAL max : 25 inputs
-//   Grille 6×3    = 18  (6 colonnes dont 2 à gauche)
-//   Forces        =  6  (mag + y par force)
-//   États internes=  2  (isOnGround, vertSpeed)
-//   vx            =  1  (toujours inclus)
-// ==============================================
-
 class Sensors {
 
   // Distances des colonnes de la grille (en tiles)
@@ -117,7 +101,6 @@ class Sensors {
   }
 
   // ── Normalisation composante Y ───────────────
-  // force.y entre -MAX_FORCE et +MAX_FORCE → [0, 1]
   // 0   = obstacle/cerise en haut (signal : sauter possible)
   // 0.5 = même niveau
   // 1   = obstacle/cerise en bas

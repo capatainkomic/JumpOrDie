@@ -1,17 +1,3 @@
-// ==============================================
-// NeuralNetwork.js
-//
-// Réseau de neurones multicouche (MLP).
-// Utilisé par chaque agent comme "cerveau".
-//
-// STRUCTURE :
-//   inputs → [couche cachée 1] → ... → [couche cachée N] → outputs
-//
-// OUTPUTS (2 neurones) :
-//   [0] → sauter si > 0.5
-//   [1] → ne rien faire
-// ==============================================
-
 class NeuralNetwork {
 
   // inputCount    : nombre d'inputs (capteurs)
@@ -63,7 +49,6 @@ class NeuralNetwork {
   }
 
   // ── Tailles de chaque couche ─────────────────
-  // [inputCount, neuronsPerLayer × hiddenLayers, 2 outputs]
   _layerSizes() {
     const sizes = [this.inputCount];
     for (let i = 0; i < this.hiddenLayers; i++) {
@@ -135,7 +120,6 @@ class NeuralNetwork {
 
   // ── Mutation ─────────────────────────────────
   // rate : probabilité de muter chaque poids (ex: 0.08)
-  // Ajoute un bruit gaussien approximé aux poids mutés
   mutate(rate) {
     for (const W of this.weights) {
       for (const row of W) {
@@ -161,7 +145,6 @@ class NeuralNetwork {
   }
 
   // ── Sérialisation JSON ───────────────────────
-  // Utilisée pour Save/Load en Feature 8
   toJSON() {
     return {
       inputCount      : this.inputCount,

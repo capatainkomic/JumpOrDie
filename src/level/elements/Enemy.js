@@ -18,7 +18,6 @@ class Enemy {
   static ANIM_RATE = 8;
  
   // ── Chargement des sprites (à appeler dans preload()) ──
-  // Retourne un tableau d'images p5.Image
   static loadFrames(folder, baseName, count) {
     const frames = [];
     for (let i = 1; i <= count; i++) {
@@ -67,9 +66,7 @@ class Enemy {
     );
   }
  
-  // ── Interface publique ───────────────────────
-  // updateMovement : animation + déplacement (1x/frame)
-  // _checkCollision : collision avec un agent
+
   updateMovement() {
     this._tickAnim();
   }

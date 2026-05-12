@@ -1,19 +1,3 @@
-// ==============================================
-// Agent.js
-//
-// Physique AABB complète :
-// - On calcule le rectangle futur après mouvement
-// - Pour chaque solide on résout par la plus
-//   petite pénétration (overlapX vs overlapY)
-//
-// TYPES DE SURFACES :
-//   ground   → résolution complète (haut/côté/bas)
-//              côté en bord de gap → mort
-//   platform → résolution complète (haut/côté/bas)
-//              côté en bord de gap → pas mort (bloque)
-//   gap      → mort si y > CANVAS_H
-// ==============================================
-
 class Agent {
 
   static GRAVITY    =  0.6;
@@ -73,8 +57,8 @@ class Agent {
   get top()    { return this.y - Agent.HEIGHT / 2; }
   get bottom() { return this.y + Agent.HEIGHT / 2; }
 
+
   // ── Update principal ─────────────────────────
-  // surfaces : { grounds: [], platforms: [], gaps: [] }
   update(surfaces) {
     if (this.isDead) return;
 

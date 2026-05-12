@@ -24,8 +24,7 @@ class Level {
 
     this._build(data.elements);
 
-    // Cache des surfaces solides — calculé une fois
-    // à la construction, pas à chaque frame
+    // Cache des surfaces solides — calculé une fois à la construction, pas à chaque frame
     this._surfaces = this._buildSurfaces();
   }
 
@@ -71,7 +70,6 @@ class Level {
   }
 
   // ── Met à jour les ennemis et les cerises ────
-  // agent : Agent actif, score : { value: Number }
   update(agents) {
     const alive = agents.filter(a => !a.isDead);
 
@@ -109,14 +107,7 @@ class Level {
     }
   }
 
-  // ── Reset cerises pour nouvelle génération ───
-  // Les cerises restent visibles — c'est le Set
-  // de chaque agent qui est resetté dans Population
-  resetCherries() {
-    // Rien à faire ici — les cerises n'ont plus d'état collected
-    // Le reset se fait via agent._collectedCherries = new Set()
-    // dans _spawnPopulation() du TrainingManager
-  }
+
   _drawFinishFlag(x, y) {
     stroke(255, 50, 50);
     strokeWeight(3);
@@ -127,14 +118,11 @@ class Level {
   }
 
   // ── Surfaces solides (depuis le cache) ───────
-  // Appelé 60x/seconde — retourne le cache calculé
-  // une seule fois à la construction du niveau
   getSolidSurfaces() {
     return this._surfaces;
   }
 
   // ── Construit le cache des surfaces ──────────
-  // Appelé une seule fois dans le constructor
   _buildSurfaces() {
     const grounds = this.grounds.map(g => ({
       left: g.x, right: g.x + g.width,

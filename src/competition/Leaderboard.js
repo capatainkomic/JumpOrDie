@@ -1,10 +1,3 @@
-// ==============================================
-// Leaderboard.js
-//
-// Affichage du classement temps réel
-// dessiné sur le canvas (pas HTML)
-// ==============================================
-
 class Leaderboard {
 
   static draw(stats, x, y) {

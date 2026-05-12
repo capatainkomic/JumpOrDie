@@ -1,16 +1,3 @@
-// ==============================================
-// sketch.js — JumpOrDie
-// Point d'entrée p5.js
-// 
-// États : 'menu' | 'config' | 'training' | 'competition'
-// Navigation :
-//   menu → config (clic ENTRAÎNEMENT)
-//   menu → competition (clic COMPÉTITION)  
-//   config → training (clic START)
-//   training → menu (RESET ou ESC)
-//   competition → menu (ESC)
-// ==============================================
-
 const CANVAS_W  = 800;
 const CANVAS_H  = 400;
 const TILE_SIZE = 16;
@@ -21,7 +8,7 @@ let tileMap;
 let levelGenerator;
 let trainingManager;
 let uiPanel;
-// Navigation centralisée dans gm.appState
+
 
 // ── Assets ────────────────────────────────────
 let bgImg;
@@ -72,15 +59,7 @@ function draw() {
 
 }
 
-// ── MENU ──────────────────────────────────────
 
-// ── CONFIG ────────────────────────────────────
-
-// ── TRAINING ──────────────────────────────────
-
-// ── STEERING DEBUG ────────────────────────────
-
-// ── COMPETITION ───────────────────────────────
 // ── COMPETITION ───────────────────────────────
 function _drawCompetition() {
   if (competitionManager.phase === 'setup') {
@@ -93,7 +72,7 @@ function _drawCompetition() {
 }
 
 
-// ── MOUSE ─────────────────────────────────────
+// ── MOUSE ─────
 function mousePressed() {
   if (mouseButton !== LEFT) return;
 
@@ -168,9 +147,6 @@ function mousePressed() {
 }
 
 // ── Callbacks training ────────────────────────
-// POURQUOI : centralisé ici pour que UIPanel n'ait pas besoin
-// de connaitre trainingManager. Sketch.js fournit les actions,
-// UIPanel les appelle sans savoir d'ou elles viennent.
 function _trainingCallbacks() {
   return {
     onStop   : () => trainingManager?.stop(),
@@ -204,8 +180,6 @@ function _onReset() {
     uiPanel.showTraining(startDiff, _trainingCallbacks());
   });
 }
-
-// ── Sélecteur de cerveau ──────────────────────
 
 // ── KEYS ──────────────────────────────────────
 function keyPressed() {

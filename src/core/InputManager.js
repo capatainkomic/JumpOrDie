@@ -1,9 +1,3 @@
-// ==============================================
-// InputManager.js
-// Singleton — centralise tous les inputs
-// souris + clavier
-// ==============================================
-
 class InputManager {
 
   constructor() {
@@ -16,16 +10,11 @@ class InputManager {
     this.mouseX = 0;
     this.mouseY = 0;
 
-    // Élément sélectionné dans l'éditeur
-    // 'platform' | 'enemy' | 'trap' | null
-    this.selectedEditorElement = null;
-
     // Callbacks enregistrés pour les clics
     this._clickCallbacks = [];
   }
 
-  
-
+ 
   // ── Clic souris gauche ───────────────────────
   onClick(camera) {
     const worldPos = camera.screenToWorld(this.mouseX, this.mouseY);
@@ -37,14 +26,6 @@ class InputManager {
     this._clickCallbacks.push(callback);
   }
 
-  // ── Sélection outil éditeur ──────────────────
-  selectEditorElement(type) {
-    this.selectedEditorElement = type;
-  }
-
-  clearEditorElement() {
-    this.selectedEditorElement = null;
-  }
 }
 
 const inputManager = new InputManager();

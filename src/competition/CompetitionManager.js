@@ -1,11 +1,3 @@
-// ==============================================
-// CompetitionManager.js
-//
-// Orchestre le mode compétition :
-//   Phase 1 — Setup : charger cerveaux + niveau
-//   Phase 2 — Race  : agents courent, leaderboard
-// ==============================================
-
 class CompetitionManager {
 
   static RACE_TIMEOUT   = 60 * 45;  // 45s à 60fps
@@ -35,9 +27,6 @@ class CompetitionManager {
     // Slots : 3 slots, chacun peut avoir un brainEntry ou null
     this.slots = [null, null, null]; // brainEntry ou null
 
-    // Agents idle pour animer les sprites en phase setup
-    this._idleAgents = null; // initialisé dans preload() après p5.js ready
-
     // Parallax
     this._parallaxX = 0;
     this._bgLayers  = { clouds: null, mountains: null, trees: null };
@@ -48,13 +37,6 @@ class CompetitionManager {
     this._bgLayers.clouds    = loadImage('assets/background parallax/bg-clouds.png',    ()=>{}, ()=>{ this._bgLayers.clouds    = null; });
     this._bgLayers.mountains = loadImage('assets/background parallax/bg-mountains.png', ()=>{}, ()=>{ this._bgLayers.mountains = null; });
     this._bgLayers.trees     = loadImage('assets/background parallax/bg-trees.png',     ()=>{}, ()=>{ this._bgLayers.trees     = null; });
-
-    // Créer les agents idle pour le setup
-    this._idleAgents = CompetitionManager.SKIN_NAMES.map(skinName => {
-      const a = new CompetitionAgent(0, 0, skinName, null);
-      a.preloadSprites();
-      return a;
-    });
   }
 
   // ── Charger un cerveau dans un slot ───────
@@ -135,10 +117,6 @@ class CompetitionManager {
       this._raceFinished = true;
     }
   }
-
-  // ── Draw race ─────────────────────────────
-
-  // ── Parallax ──────────────────────────────
 
   // ── Stats pour leaderboard ────────────────
   get raceStats() {

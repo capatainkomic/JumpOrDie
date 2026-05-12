@@ -1,25 +1,8 @@
-// ==============================================
-// GeneticAlgorithm.js
-//
-// Implémente la sélection naturelle :
-//   1. Trier les agents par fitness
-//   2. Garder les meilleurs (élitisme)
-//   3. Crossover + mutation pour les autres
-//
-// FITNESS FUNCTION :
-//   distance × 2
-//   + cerises collectées × 100
-//   + temps survécu × 3
-//   - sauts inutiles × 5
-// ==============================================
-
 class GeneticAlgorithm {
 
   static ELITE_RATIO = 0.30; // top 30% conservés sans mutation
 
   // ── Calcul du fitness ────────────────────────
-  // Appelé à chaque frame par Population.update()
-  // Met à jour agent.fitness en temps réel
   static calcFitness(agent, level) {
     if (agent.isDead) return;
 
@@ -37,8 +20,6 @@ class GeneticAlgorithm {
   }
 
   // ── Prochaine génération ─────────────────────
-  // agents : tableau d'Agent de la génération courante
-  // Retourne un tableau de NeuralNetwork pour la prochaine génération
   static nextGeneration(agents) {
     // 1. Trier par fitness décroissant
     const sorted = [...agents].sort((a, b) => b.fitness - a.fitness);
@@ -69,9 +50,6 @@ class GeneticAlgorithm {
   }
 
   // ── Sélection par tournoi ────────────────────
-  // Choisit un parent parmi les meilleurs
-  // Les agents avec un meilleur fitness ont plus
-  // de chances d'être sélectionnés
   static _selectParent(sortedAgents) {
     // Sélection par roulette biaisée vers le haut
     // Plus le rang est élevé, plus la probabilité est grande
@@ -92,7 +70,6 @@ class GeneticAlgorithm {
   }
 
   // ── Crossover entre deux cerveaux ────────────
-  // Pour chaque poids : choisir aléatoirement brainA ou brainB
   static _crossover(brainA, brainB) {
     const child = brainA.copy();
 
@@ -117,8 +94,7 @@ class GeneticAlgorithm {
     return child;
   }
 
-  // ── Vérifie la condition d'arrêt ─────────────
-  // Retourne true si l'entraînement doit s'arrêter
+  // ── Vérifie la condition d'arrêt : Retourne true si l'entraînement doit s'arrêter─────────────
   static checkStopCondition(agents, level) {
     const threshold = gm.config.stopConditionThreshold;
     const pct       = gm.config.stopConditionPct;

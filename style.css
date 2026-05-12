@@ -45,7 +45,7 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    url('./assets/background parallax/sea_layer_1.png') center/cover no-repeat;
+    url('./assets/images/sea_layer_1.png') center/cover no-repeat;
   
   z-index: -2;
 }
@@ -226,6 +226,7 @@ body::after {
 .cfg-slider-track { flex: 1; }
 
 input[type=range].cfg-range {
+  appearance: none;
   -webkit-appearance: none;
   width: 100%; height: 5px; border-radius: 10px;
   outline: none; cursor: pointer; border: none;
@@ -266,6 +267,7 @@ select.cfg-select-input {
   font-size: 7px; font-weight: 700; padding: 2px 5px;
   cursor: pointer; outline: none;
   box-shadow: inset 1px 1px 3px #C8D0DE, inset -1px -1px 3px #FFFFFF;
+  appearance: none;
   -webkit-appearance: none;
 }
 

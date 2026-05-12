@@ -1,9 +1,3 @@
-// ==============================================
-// Camera.js
-// Gère le scroll horizontal du niveau
-// La caméra suit le meilleur agent vivant
-// ==============================================
-
 class Camera {
 
   constructor(canvasWidth, canvasHeight) {
