@@ -7,16 +7,18 @@
 //   2. Forces Reynolds (seek/avoid normalisées)
 //   3. États internes (physique de l'agent)
 //
-// TOTAL : 20 inputs
-//   Grille 4×3    = 12
-//   Forces        =  6 (mag + y par force)
-//   États internes=  2
+// TOTAL max : 25 inputs
+//   Grille 6×3    = 18  (6 colonnes dont 2 à gauche)
+//   Forces        =  6  (mag + y par force)
+//   États internes=  2  (isOnGround, vertSpeed)
+//   vx            =  1  (toujours inclus)
 // ==============================================
 
 class Sensors {
 
   // Distances des colonnes de la grille (en tiles)
-  static GRID_COLS   = [1, 2, 4, 8];
+  // Négatives = derrière l'agent (gauche), positives = devant (droite)
+  static GRID_COLS   = [-2, -1, 0, 1, 2, 4, 8]; // 6 colonnes
   static GRID_ROWS   = 3; // haut / milieu / bas
 
   // Hauteurs des lignes relatives au centre de l'agent
@@ -77,6 +79,12 @@ class Sensors {
       inputs.push(Sensors._normVY(agent.vy));
     }
 
+     // Vitesse horizontale — si activé
+    if (cfg.horizSpeed) {
+      inputs.push(constrain((agent.vx / Agent.MOVE_SPEED + 1) / 2, 0, 1));
+    }
+ 
+
     return inputs; // longueur = inputCount exact
   }
 
@@ -102,14 +110,17 @@ class Sensors {
   }
 
   // ── Normalisation magnitude ──────────────────
-  // force.mag() / MAX_FORCE → [0, 1]
+  // force.x encode la proximité [0, MAX_FORCE] → [0, 1]
+  // 0 = absent/loin, 1 = très proche
   static _normMag(force) {
-    return constrain(force.mag() / Agent.MAX_FORCE, 0, 1);
+    return constrain(force.x / Agent.MAX_FORCE, 0, 1);
   }
 
   // ── Normalisation composante Y ───────────────
   // force.y entre -MAX_FORCE et +MAX_FORCE → [0, 1]
-  // 0.5 = neutre, <0.5 = vers le haut, >0.5 = vers le bas
+  // 0   = obstacle/cerise en haut (signal : sauter possible)
+  // 0.5 = même niveau
+  // 1   = obstacle/cerise en bas
   static _normY(force) {
     return constrain(
       (force.y + Agent.MAX_FORCE) / (2 * Agent.MAX_FORCE),

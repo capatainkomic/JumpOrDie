@@ -36,11 +36,12 @@ class Agent {
     this.y = y;
     this.col = col;
 
-    this.vx = Agent.MOVE_SPEED;
+    this.vx = 0;
     this.vy = 0;
 
     this.isOnGround = false;
     this.isDead     = false;
+    this.wasHitByEnemy = false;
 
     // Cerveau — assigné par Population en Feature 5
     // null = agent contrôlé manuellement (test)
@@ -59,7 +60,10 @@ class Agent {
   decide(inputs) {
     if (!this.brain) return;
     const output = this.brain.forward(inputs);
-    if (output[0] > 0.5) this.jump();
+    // out[0] → vitesse horizontale : 0=gauche, 0.5=stop, 1=droite
+    this.vx = (output[0] * 2 - 1) * Agent.MOVE_SPEED;
+    // out[1] → sauter
+    if (output[1] > 0.5) this.jump();
   }
 
 
@@ -88,7 +92,8 @@ class Agent {
     this._moveY(dy, surfaces);
 
     // 4. Mort si tombe hors canvas
-    if (this.y > CANVAS_H + 50) {
+    // Mort si sort du canvas (bas ou gauche)
+    if (this.y > CANVAS_H + 50 || this.x < this._startX - 50) {
       this.isDead = true;
     }
 
@@ -101,7 +106,6 @@ class Agent {
   _moveX(dx, surfaces) {
     // Toujours restaurer la vitesse horizontale
     // Si un mur est toujours là, la collision le bloquera à nouveau
-    this.vx = Agent.MOVE_SPEED;
     this.x += this.vx;
 
     const hw = Agent.WIDTH / 2;
@@ -250,12 +254,12 @@ class Agent {
     if (d2 < distance) { distance = d2; pointLePlusProche = pointAhead2; }
     if (d3 < distance) { distance = d3; pointLePlusProche = agentPos; }
 
-    const r           = (obstacle.w ?? TILE_SIZE) / 2;
+    const r  = (obstacle.w ?? TILE_SIZE);
     // Zone élargie — s'active 2 tiles avant le contact
     // pour laisser le temps au réseau de réagir
-    const largeurZone = Agent.WIDTH / 2 + r + 2 * TILE_SIZE;
+    const largeurZone = Agent.WIDTH / 2 ;
 
-    if (distance < largeurZone) {
+    if (distance < r + largeurZone) {
       const force = p5.Vector.sub(pointLePlusProche, obsPos);
       force.setMag(Agent.MAX_SPEED);
       force.sub(createVector(this.vx, this.vy));
@@ -273,7 +277,6 @@ class Agent {
 
     for (const c of cherries) {
       if (c.collected)   continue;
-      if (c.x < this.x) continue;
       const d = dist(this.x, this.y, c.x, c.y);
       if (d < minDist) { minDist = d; closest = c; }
     }
@@ -286,7 +289,6 @@ class Agent {
     let minDist = Agent.PERCEPTION_RADIUS;
 
     for (const e of enemies) {
-      if (e.x < this.x) continue;
       const d = dist(this.x, this.y, e.x, e.y);
       if (d < minDist) { minDist = d; closest = e; }
     }
@@ -302,10 +304,12 @@ class Agent {
     // Point d'amélioration 
     ellipse(floor(this.x), floor(this.y), Agent.WIDTH, Agent.HEIGHT);
     if (!this.isDead) {
+      // Œil du côté de la direction de déplacement
+      const eyeOffsetX = this.vx >= 0 ? 3 : -3;
       fill(255, alpha);
-      ellipse(this.x + 3, this.y - 4, 4, 4);
+      ellipse(this.x + eyeOffsetX, this.y - 4, 4, 4);
       fill(0, alpha);
-      ellipse(this.x + 4, this.y - 4, 2, 2);
+      ellipse(this.x + eyeOffsetX + (this.vx >= 0 ? 1 : -1), this.y - 4, 2, 2);
     }
     pop();
   }

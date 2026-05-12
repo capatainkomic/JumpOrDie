@@ -16,7 +16,7 @@ class UIPanel {
     this._startDiff    = 'easy';
     this._inputConfig  = {
       grid: true, avoidOpossum: true, avoidEagle: true,
-      seekCherry: true, isOnGround: true, vertSpeed: true,
+      seekCherry: true, isOnGround: true, vertSpeed: true, horizSpeed: true,
     };
     // Valeurs courantes des sliders config
     this._cfgVals = {

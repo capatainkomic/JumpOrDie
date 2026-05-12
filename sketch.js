@@ -29,8 +29,12 @@ let logoImg;
 
 // ── Preload ───────────────────────────────────
 function preload() {
-  bgImg   = loadImage('./assets/images/background.png');
-  logoImg = loadImage('./assets/images/logo.png');
+  bgImg   = loadImage('./assets/images/background.png',
+    () => {}, () => { bgImg = null; });
+  logoImg = loadImage('./assets/images/logo.png',
+    () => {}, () => { logoImg = null; });
+  _woodBtn = loadImage('./assets/images/wood_button.png',
+    () => {}, () => { _woodBtn = null; });
 
   tileMap = new TileMap();
   tileMap.preload();
@@ -105,11 +109,15 @@ function mousePressed() {
   }
 
   if (gm.isMenu()) {
-    const cx = CANVAS_W / 2;
+    const btnW = 260;
+    const btnH = Math.round(btnW * (667 / 1746));
+    const btnX = CANVAS_W / 2 - btnW / 2;
+    const btnY1 = 155;
+    const btnY2 = btnY1 + btnH + 16;
 
-    // Bouton ENTRAÎNEMENT
-    if (mouseX > cx-130 && mouseX < cx+130 &&
-        mouseY > 198   && mouseY < 242) {
+    // Bouton TRAINING
+    if (mouseX > btnX && mouseX < btnX + btnW &&
+        mouseY > btnY1 && mouseY < btnY1 + btnH) {
       gm.goToConfig();
       uiPanel.showConfig((startDiff) => {
         gm.reset();
@@ -119,9 +127,9 @@ function mousePressed() {
       });
     }
 
-    // Bouton COMPÉTITION
-    if (mouseX > cx-130 && mouseX < cx+130 &&
-        mouseY > 253   && mouseY < 297) {
+    // Bouton COMPETITION
+    if (mouseX > btnX && mouseX < btnX + btnW &&
+        mouseY > btnY2 && mouseY < btnY2 + btnH) {
       gm.goToCompetition();
       competitionManager.reset();
       uiPanel._phase = 'menu';

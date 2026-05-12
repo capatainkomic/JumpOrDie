@@ -75,7 +75,10 @@ class Enemy {
   }
 
   _checkCollision(agent) {
-    if (this._collidesWithAgent(agent)) agent.isDead = true;
+    if (this._collidesWithAgent(agent)) {
+      agent.isDead = true;
+      agent.wasHitByEnemy = true;
+    } 
   }
 
   // Gardé pour compatibilité si appelé directement

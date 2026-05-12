@@ -137,6 +137,9 @@ class CompetitionAgent extends Agent {
     push();
     imageMode(CENTER);
 
+    // Retourner le sprite si l'agent va à gauche
+    if (this.vx < 0) scale(-1, 1);
+
     if (this.isDead) {
       tint(255, 80); // transparence si mort
     } else {

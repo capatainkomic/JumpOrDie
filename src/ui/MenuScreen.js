@@ -1,3 +1,6 @@
+let _menuLogoY = 0;
+let _woodBtn   = null;
+
 // ==============================================
 // MenuScreen.js
 // Rendu du menu principal
@@ -38,44 +41,15 @@ function _drawMenu() {
     _drawFallbackLogo(CANVAS_W / 2, logoY + logoH / 2);
   }
 
-  // ── Wooden signboard panel ──────────────────
-  const panelW = 320, panelH = 170;
-  const panelX = CANVAS_W / 2 - panelW / 2;
-  const panelY = 160;
+  // ── Menu buttons flottants ──────────────────
+  const btnW  = 260;
+  const btnH  = round(btnW * (667 / 1746)); // ratio 1746x667
+  const btnY1 = 155;
+  const btnY2 = btnY1 + btnH + 16;
+  const btnX  = CANVAS_W / 2 - btnW / 2;
 
-  // Panel shadow
-  noStroke();
-  fill(0, 0, 0, 60);
-  rect(panelX + 5, panelY + 8, panelW, panelH, 10);
-
-  // Wood base
-  fill(80, 45, 15);
-  stroke(40, 22, 5);
-  strokeWeight(4);
-  rect(panelX, panelY, panelW, panelH, 8);
-
-  // Inner lighter wood
-  fill(120, 72, 30);
-  stroke(90, 55, 20);
-  strokeWeight(2);
-  rect(panelX + 5, panelY + 5, panelW - 10, panelH - 10, 5);
-
-  // Wood grain lines
-  stroke(100, 62, 25, 40);
-  strokeWeight(1);
-  for (let gy = 0; gy < panelH; gy += 9) {
-    line(panelX + 8, panelY + 8 + gy, panelX + panelW - 8, panelY + 8 + gy);
-  }
-
-  // Corner nails
-  _nail(panelX + 14, panelY + 14);
-  _nail(panelX + panelW - 14, panelY + 14);
-  _nail(panelX + 14, panelY + panelH - 14);
-  _nail(panelX + panelW - 14, panelY + panelH - 14);
-
-  // ── Menu buttons ────────────────────────────
-  _menuBtn(CANVAS_W / 2, panelY + 50,  'TRAINING MODE',   [80, 160, 60],  [50, 120, 35]);
-  _menuBtn(CANVAS_W / 2, panelY + 105, 'COMPETITION MODE', [180, 130, 20], [130, 90, 10]);
+  _menuBtn(btnX, btnY1, btnW, btnH, 'TRAINING MODE');
+  _menuBtn(btnX, btnY2, btnW, btnH, 'COMPETITION MODE');
 
  
 }
@@ -88,56 +62,49 @@ function _nail(x, y) {
   circle(x - 1, y - 1, 4);
 }
 
-function _menuBtn(x, y, label, colTop, colBot) {
-  const W = 280, H = 44;
-  const hover = mouseX > x - W / 2 && mouseX < x + W / 2 &&
-                mouseY > y - H / 2 && mouseY < y + H / 2;
+function _menuBtn(x, y, w, h, label) {
+  const hover = mouseX > x - (w * 0.05) && mouseX < x + w + (w * 0.05) &&
+                mouseY > y - (h * 0.05) && mouseY < y + h + (h * 0.05);
+  const press = hover && mouseIsPressed;
 
-  // Shadow
-  noStroke();
-  fill(0, 0, 0, 50);
-  rect(x - W / 2 + 3, y - H / 2 + 5, W, H, 10);
+  // Scale up au hover : 5% plus grand, centré
+  const scale = press ? 0.97 : (hover ? 1.05 : 1.0);
+  const dw    = w * scale;
+  const dh    = h * scale;
+  const dx    = x + (w - dw) / 2;
+  const dy    = y + (h - dh) / 2 + (press ? 2 : 0);
 
-  // Button gradient
-  if (hover) {
-    // Glowing highlight
-    drawingContext.shadowColor = `rgba(${colTop[0]}, ${colTop[1]}, ${colTop[2]}, 0.5)`;
-    drawingContext.shadowBlur  = 12;
+  push();
+  imageMode(CORNER);
+  noTint();
+
+  // Ombre portée
+  if (!press && _woodBtn) {
+    drawingContext.globalAlpha = 0.35;
+    image(_woodBtn, dx + 3, dy + 5, dw, dh);
+    drawingContext.globalAlpha = 1.0;
   }
-  const gr = drawingContext.createLinearGradient(0, y - H/2, 0, y + H/2);
-  gr.addColorStop(0, `rgb(${colTop[0]+20}, ${colTop[1]+20}, ${colTop[2]+20})`);
-  gr.addColorStop(1, `rgb(${colBot[0]}, ${colBot[1]}, ${colBot[2]})`);
-  drawingContext.fillStyle = gr;
 
-  stroke(Math.max(0, colTop[0] - 30), Math.max(0, colTop[1] - 30), Math.max(0, colTop[2] - 30));
-  strokeWeight(3);
-  rect(x - W / 2, y - H / 2, W, H, 10);
-  drawingContext.shadowColor = 'transparent';
-  drawingContext.shadowBlur  = 0;
+  // Bouton — pas de tint, couleur originale
+  if (_woodBtn) {
+    image(_woodBtn, dx, dy, dw, dh);
+  } else {
+    fill(110, 65, 22); noStroke();
+    rect(dx, dy, dw, dh, 8);
+  }
 
-  // Top highlight line
-  stroke(255, 255, 255, hover ? 80 : 40);
-  strokeWeight(1);
-  line(x - W/2 + 12, y - H/2 + 3, x + W/2 - 12, y - H/2 + 3);
-
-  // Bottom shadow line
-  stroke(0, 0, 0, 60);
-  line(x - W/2 + 6, y + H/2 - 4, x + W/2 - 6, y + H/2 - 4);
-
-  // Label
-  noStroke();
-  fill(hover ? 255 : 240, hover ? 255 : 240, hover ? 210 : 180);
+  // Texte ombre
+  fill(40, 20, 5, 160);
   textFont('Press Start 2P');
-  textSize(10);
+  textSize(9 * scale);
   textAlign(CENTER, CENTER);
-  text(label, x + (hover ? 1 : 0), y + (hover ? 1 : 0));
+  text(label, dx + dw/2 + 1, dy + dh/2 + 1);
 
-  // Hover arrow
-  if (hover) {
-    fill(255, 255, 180, 200);
-    textSize(10);
-    text('»', x - W / 2 + 16, y);
-  }
+  // Texte principal
+  fill(245, 235, 165);
+  text(label, dx + dw/2, dy + dh/2);
+
+  pop();
 }
 
 function _drawFallbackLogo(x, y) {

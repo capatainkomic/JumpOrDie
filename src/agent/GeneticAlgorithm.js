@@ -31,9 +31,9 @@ class GeneticAlgorithm {
 
     agent.fitness =
       agent.distanceTravelled * 2
-      + agent.cherriesCollected * 80
-      + avgSpeed * 40
-      - agent.jumpCount * 0.5;
+      + agent.cherriesCollected * 200
+      + avgSpeed * 15
+      + (agent.wasHitByEnemy ? -600 : 0);
   }
 
   // ── Prochaine génération ─────────────────────

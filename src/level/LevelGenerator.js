@@ -89,13 +89,16 @@ class LevelGenerator {
       width: px(20), height: CANVAS_H - groundY,
     });
     curT = 20;
+    let lastGeneratedWasGap = false; // empêcher 2 gaps consécutifs sans sol entre eux
 
     // ── Boucle principale ────────────────────────
     while (curT < levelLengthT - 24) {
 
-      if (random() < rules.gapFreq) {
+      if (!lastGeneratedWasGap &&random() < rules.gapFreq) {
         curT = this._generateGap(elements, curT, rules, groundY, T, randT, px);
+        lastGeneratedWasGap = true;
       } else {
+        lastGeneratedWasGap = false;
         // Changement de hauteur AVANT le placement du sol
         if (random() < 0.3) {
           heightKey = nextKey(heightKey);

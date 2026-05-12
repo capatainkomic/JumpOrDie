@@ -312,14 +312,35 @@ function _drawRaceFinished() {
 }
 
 function _openBrainSelector(slotIndex) {
-  const brains = BrainStorage.loadAll();
+   // Charger localStorage + default_brains.json en parallèle
+  const localBrains = BrainStorage.loadAll();
+ 
+  fetch('assets/brains/default_brains.json')
+    .then(r => r.ok ? r.json() : { brains: [] })
+    .catch(() => ({ brains: [] }))
+    .then(data => {
+      const defaults = (data.brains || []).map(b => ({ ...b, _isDefault: true }));
+      // Fusionner : défauts d'abord, puis cerveaux locaux
+      // Dédupliquer par nom pour éviter les doublons si l'user a importé les défauts
+      const seen   = new Set();
+      const brains = [...defaults, ...localBrains].filter(b => {
+        const key = b.name + '_' + b.generation;
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      });
+ 
+      if (brains.length === 0) {
+        alert('Aucun cerveau disponible.\nEntraînez un cerveau en mode Training puis sauvegardez-le avec 💾 SAUVEGARDER.');
+        return;
+      }
+ 
+      _buildBrainPopup(slotIndex, brains);
+    });
+  
+}
 
-  if (brains.length === 0) {
-    alert('Aucun cerveau disponible.\nEntrainez un cerveau en mode Training puis sauvegardez-le avec SAUVEGARDER.');
-    return;
-  }
-
-  const skinNames  = ['Fox', 'Bunny', 'Squirrel'];
+function _buildBrainPopup(slotIndex, brains) {
+    const skinNames  = ['Fox', 'Bunny', 'Squirrel'];
   const skinEmojis = ['🦊', '🐰', '🐿️'];
   const slotColors = ['#FF9632', '#78C8FF', '#B4DC50'];
   const slotColor  = slotColors[slotIndex] || '#7C6EEB';
@@ -348,10 +369,25 @@ function _openBrainSelector(slotIndex) {
 
   // Header
   const header = document.createElement('div');
-  header.style.cssText = 'padding:16px 20px 14px;border-bottom:0.5px solid rgba(0,0,0,0.08);flex-shrink:0;';
-  header.innerHTML =
-    '<p style="font-size:12px;color:#888;margin:0 0 2px;text-align:center;">' + ' &nbsp;&nbsp; <span style="color:' + slotColor + ';font-weight:700;">' + skinNames[slotIndex] + '</span></p>' +
-    '<p style="font-size:17px;font-weight:700;margin:0;color:#111;text-align:center;">Choisir un cerveau</p>';
+  header.style.cssText = 'padding:16px 20px 14px;border-bottom:0.5px solid rgba(0,0,0,0.08);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;';
+ 
+  const headerLeft = document.createElement('div');
+  headerLeft.innerHTML =
+    '<p style="font-size:12px;color:#888;margin:0 0 2px;">Slot ' + (slotIndex+1) + ' &nbsp;—&nbsp; <span style="color:' + slotColor + ';font-weight:700;">' + skinNames[slotIndex] + '</span></p>' +
+    '<p style="font-size:17px;font-weight:700;margin:0;color:#111;">Choisir un cerveau</p>';
+ 
+  const importBtn = document.createElement('button');
+  importBtn.style.cssText = 'width:fit-content;padding:6px 12px;background:none;color:#7C6EEB;border:0.5px solid rgba(124,110,235,0.4);border-radius:7px;font-family:Nunito;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;';
+  importBtn.textContent = '📂 Importer';
+  importBtn.onclick = () => {
+    BrainStorage.importJSON(() => {
+      close();
+      setTimeout(() => _openBrainSelector(slotIndex), 100);
+    });
+  };
+ 
+  header.appendChild(headerLeft);
+  header.appendChild(importBtn);
   popup.appendChild(header);
 
   // Liste
@@ -409,6 +445,7 @@ function _openBrainSelector(slotIndex) {
   cancelBtn.onclick = close;
   footer.appendChild(cancelBtn);
   popup.appendChild(footer);
+
 }
 
 function _mkStat(label, value) {

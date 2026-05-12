@@ -58,7 +58,7 @@ UIPanel.prototype._buildConfigHTML = function() {
     <div class="cfg-main-panel">
 
       <!-- COLONNE GAUCHE -->
-      <div class="cfg-col-left">
+      <div class="cfg-col-left" style="overflow-y:auto;">
 
         <div class="cfg-section-header">
           <span class="cfg-section-title">RÉSEAU DE NEURONES</span>
@@ -83,14 +83,15 @@ UIPanel.prototype._buildConfigHTML = function() {
         </div>
 
         <div class="cfg-cb-grid">
-          ${cbRow(false,'grid',        'GRILLE (12)',  12,  true)}
+          ${cbRow(false,'grid',        'GRILLE (21)',  21,  true)}
           ${cbRow(false,'forces',      'REYNOLDS (6)',  6,  true)}
-          ${cbRow(false,'states',      'INTERNES (2)', 2,  true)}
+          ${cbRow(false,'states',      'INTERNES (3)', 3,  true)}
           ${cbRow(true, 'avoidEagle',  '↳ EAGLE',    '+2', false)}
           ${cbRow(true, 'vertSpeed',   '↳ VITESSE VERTICALE',  '+1', false)}
           ${cbRow(true, 'avoidOpossum','↳ OPOSSUM',  '+2', false)}
           ${cbRow(true, 'isOnGround',  '↳ EN L\'AIR', '+1', false)}
           ${cbRow(true, 'seekCherry',  '↳ CHERRY',   '+2', false)}
+          ${cbRow(true, 'horizSpeed',  '↳ VIT. HORIZ.', '+1', false)}
           
         </div>
 
@@ -248,7 +249,7 @@ UIPanel.prototype._bindConfigEvents = function(overlay, onStart) {
             if (child) this._toggleBox(child, newVal);
           });
         } else if (key === 'states') {
-          ['isOnGround','vertSpeed'].forEach(k => {
+          ['isOnGround','vertSpeed', 'horizSpeed'].forEach(k => {
             ic[k] = newVal;
             const child = el.querySelector(`.cfg-cb-check[data-key="${k}"]`);
             if (child) this._toggleBox(child, newVal);
@@ -263,8 +264,8 @@ UIPanel.prototype._bindConfigEvents = function(overlay, onStart) {
                 if (p) this._toggleBox(p, false);
               }
             }
-            if (['isOnGround','vertSpeed'].includes(key)) {
-              if (!ic.isOnGround && !ic.vertSpeed) {
+            if (['isOnGround','vertSpeed', 'horizSpeed'].includes(key)) {
+              if (!ic.isOnGround && !ic.vertSpeed && !ic.horizSpeed) {
                 const p = el.querySelector('.cfg-cb-check[data-key="states"]');
                 if (p) this._toggleBox(p, false);
               }
@@ -297,6 +298,7 @@ UIPanel.prototype._bindConfigEvents = function(overlay, onStart) {
 
 UIPanel.prototype._countInputs = function() {
     const ic = this._inputConfig;
-    return (ic.grid?12:0)+(ic.avoidOpossum?2:0)+(ic.avoidEagle?2:0)+
-           (ic.seekCherry?2:0)+(ic.isOnGround?1:0)+(ic.vertSpeed?1:0);
+    if (ic.horizSpeed) print('horizSpeed is on');
+    return (ic.grid?21:0)+(ic.avoidOpossum?2:0)+(ic.avoidEagle?2:0)+
+           (ic.seekCherry?2:0)+(ic.isOnGround?1:0)+(ic.vertSpeed?1:0) + (ic.horizSpeed?1:0);
   }

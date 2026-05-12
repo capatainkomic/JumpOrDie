@@ -18,7 +18,7 @@
 
 class TrainingManager {
 
-  static SESSION_TIMEOUT  = 60 * 30;
+  static SESSION_TIMEOUT  = 60 * 30 * 2; // 2 minutes 
   static DIFFICULTY_ORDER = ['easy', 'medium', 'hard', 'killer'];
 
   constructor(tileMap, levelGenerator) {

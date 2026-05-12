@@ -33,7 +33,7 @@ class GameManager {
     // ── Config entraînement ─────────────────────
     this.config = {
       populationSize         : 50,
-      inputCount             : 20,
+      inputCount             : 21,
       hiddenLayers           : 2,
       neuronsPerLayer        : 12,
       activationFn           : 'sigmoid',
@@ -45,6 +45,7 @@ class GameManager {
         seekCherry  : true,
         isOnGround  : true,
         vertSpeed   : true,
+        horizSpeed  : true,
       },
       generationsPerLevel    : 10,
       levelsBeforeDifficulty : 3,
