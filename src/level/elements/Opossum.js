@@ -1,21 +1,12 @@
-// ==============================================
-// Opossum — patrouille sur sa section de ground
-// ==============================================
 class Opossum extends Enemy {
  
   static SPEED    = 1.5;
   static SPRITE_W = 36;
   static SPRITE_H = 28;
  
-  // frames : Opossum.frames (chargés via preload)
   static frames = [];
  
-  static preload() {
-    Opossum.frames = Enemy.loadFrames('opossum', 'opossum-', 6);
-  }
- 
-  get w() { return Opossum.SPRITE_W; }
-  get h() { return Opossum.SPRITE_H; }
+
 
   constructor(x, y, patrolLeft, patrolRight) {
     super(x, y, Opossum.frames);
@@ -23,23 +14,57 @@ class Opossum extends Enemy {
     this.patrolLeft  = patrolLeft;
     this.patrolRight = patrolRight;
  
-    // Les sprites regardent vers la gauche → direction initiale : gauche
+    // Direction initiale vers la gauche
     this._dir = -1;
   }
+
+
+  get w() { return Opossum.SPRITE_W; }
+  get h() { return Opossum.SPRITE_H; }
+
+
+  //  ─────────────────────────────────────────────
+
+  static preload() {
+    Opossum.frames = Enemy.loadFrames('opossum', 'opossum-', 6);
+  }
+
+
+  //  ──────────────── Public ──────────────────────────
+
  
   updateMovement() {
-    this._tickAnim();
+    super.updateMovement();
     this._move();
   }
 
-  _checkCollision(agent) {
-    if (this._collidesWithAgent(agent)) agent.isDead = true;
+
+  draw() {
+    const img = this.frames[this._frameIndex];
+    if (!img) return;
+ 
+    push();
+
+    // Gestion de l'orientation du sprite selon la direction de déplacement
+    if (this._dir === 1) {
+      translate(this.x + this.w, this.y);
+      scale(-1, 1);
+      image(img, 0, 0);
+    } else {
+      image(img, this.x, this.y);
+    }
+
+    pop();
   }
+
+
+  //  ──────────────── Privé ─────────────────────────────
+
  
   _move() {
     this.x += Opossum.SPEED * this._dir;
  
-    // Demi-tour aux bornes de patrouille
+    // patrouille entre 2 limites 
     if (this.x <= this.patrolLeft) {
       this.x   = this.patrolLeft;
       this._dir = 1;
@@ -49,19 +74,6 @@ class Opossum extends Enemy {
     }
   }
  
-  draw() {
-    const img = this.frames[this._frameIndex];
-    if (!img) return;
- 
-    push();
-    if (this._dir === 1) {
-      // Sprite regarde gauche → flip horizontal pour regarder droite
-      translate(this.x + this.w, this.y);
-      scale(-1, 1);
-      image(img, 0, 0);
-    } else {
-      image(img, this.x, this.y);
-    }
-    pop();
-  }
+
+  
 }

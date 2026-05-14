@@ -1,58 +1,57 @@
-// ==============================================
-// Platform.js
-// Représente une plateforme dans le niveau.
-// Responsabilité : stocker position/taille
-// et se dessiner avec les bons tiles.
-// ==============================================
-
 class Platform {
 
-  // tiles : objet { left, mid, right } contenant
-  //         les images p5.js chargées dans preload()
-  constructor(x, y, width, tiles) {
-    // Position monde (coin top-left de la plateforme)
+  /**
+   * @constructor
+   * @param {*} x position de la plateforme 
+   * @param {*} y position de la plateforme
+   * @param {*} width  largeur de la plateforme (doit être un multiple de TILE_SIZE)
+   * @param {*} spriteSet  ensemble des images à utiliser pour le rendu de la plateforme 
+   */
+  constructor(x, y, width, spriteSet) {
     this.x = x;
     this.y = y;
 
-    // Largeur en pixels — toujours multiple de TILE_SIZE
     this.width = width;
 
-    // Hauteur fixe = 1 tile (plateformes fines style Mario)
+    // Hauteur fixe en pixel, egale a la hauteur d'un tile
     this.height = TILE_SIZE;
 
-    // Tiles visuels
-    this.tiles = tiles;
+    this.spriteSet = spriteSet;
 
-    // AABB pour les collisions (Feature 3)
-    this.left   = this.x;
-    this.right  = this.x + this.width;
-    this.top    = this.y;
-    this.bottom = this.y + this.height;
   }
 
-  // ── Rendu ────────────────────────────────────
+
+  get left()   { return this.x; }
+  get right()  { return this.x + this.width; }
+  get top()    { return this.y; }
+  get bottom() { return this.y + this.height; }
+
+
+
+  //  ──────────────── Public ──────────────────────────
+
+
   draw() {
-    const t = TILE_SIZE;
-    const cols = Math.round(this.width / t);
+    const cols = Math.round(this.width / TILE_SIZE);
 
     if (cols <= 0) return;
 
     if (cols === 1) {
-      // Plateforme d'1 seul tile : on utilise mid
-      image(this.tiles.mid, this.x, this.y, t, t);
+      // Si la plateforme mesure un tile , on utilise le tile du milieu pour l'affichage de la plateforme
+      image(this.spriteSet.mid, this.x, this.y, TILE_SIZE, TILE_SIZE);
       return;
     }
 
-    // Tile gauche
-    image(this.tiles.left, this.x, this.y, t, t);
+    // Tile gauche de la plateforme 
+    image(this.spriteSet.left, this.x, this.y, TILE_SIZE, TILE_SIZE);
 
-    // Tiles du milieu
+    // Tiles du milieu de la plateforme 
     for (let i = 1; i < cols - 1; i++) {
-      image(this.tiles.mid, this.x + i * t, this.y, t, t);
+      image(this.spriteSet.mid, this.x + i * TILE_SIZE, this.y, TILE_SIZE, TILE_SIZE);
     }
 
-    // Tile droit
-    image(this.tiles.right,
-      this.x + (cols - 1) * t, this.y, t, t);
+    // Tile droit de la plateforme
+    image(this.spriteSet.right,
+      this.x + (cols - 1) * TILE_SIZE, this.y, TILE_SIZE, TILE_SIZE);
   }
 }
