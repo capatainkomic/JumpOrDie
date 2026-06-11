@@ -1,17 +1,17 @@
 // ==============================================
 // Level.js
-// Responsabilité : instancier les éléments
-// depuis les données JSON du générateur,
-// et coordonner leur mise à jour + rendu.
+// Responsabilité : instancier les éléments depuis les données JSON du générateur, et coordonner leur mise à jour + rendu.
 // ==============================================
 
 class Level {
 
-  // tileMap  : instance de TileMap (tiles chargées)
-  // data     : objet retourné par LevelGenerator.generate()
+  /**
+   * @constructor
+   * @param {*} tileMap Ensemble des tiles images utilisées pour l'affichage du ground et des plateformes
+   * @param {*} data  Ensemble des données permettant de construire le niveau (ground, plateformes, gap, ennemis, cerises)
+   */
   constructor(tileMap, data) {
     this.tileMap  = tileMap;
-    this.data     = data;
     this.length   = data.length;
     this.groundY  = data.groundY;
 
@@ -27,6 +27,59 @@ class Level {
     // Cache des surfaces solides — calculé une fois à la construction, pas à chaque frame
     this._surfaces = this._buildSurfaces();
   }
+
+
+  //  ──────────────────── Public ────────────────────
+  
+
+  // ── Met à jour les ennemis et les cerises ────
+  update(agents) {
+    const alive = agents.filter(a => !a.isDead);
+
+    // Mouvement + animation — une seule fois par frame
+    for (const enemy  of this.enemies)  enemy.updateMovement();
+    for (const cherry of this.cherries) cherry.updateAnimation();
+
+    // Collisions — pour chaque agent vivant
+    for (const agent of alive) {
+      for (const enemy  of this.enemies)  enemy.checkCollision(agent);
+      for (const cherry of this.cherries) cherry.checkCollision(agent);
+    }
+  }
+
+
+  // ── Rendu complet du niveau ──────────────────
+  draw() {
+    for (const g of this.grounds) {
+      this.tileMap.drawGround(g.x, g.y, g.width, g.height);
+    }
+
+    for (const p of this.platforms) {
+      p.draw();
+    }
+
+    for (const cherry of this.cherries) {
+      cherry.draw();
+    }
+
+    for (const enemy of this.enemies) {
+      enemy.draw();
+    }
+
+    if (this.finish) {
+      this._drawFinishFlag(this.finish.x, this.finish.y);
+    }
+  }
+
+
+  // ── Surfaces solides (depuis le cache) ───────
+  getSolidSurfaces() {
+    return this._surfaces;
+  }
+
+
+
+  //  ──────────────── Privé ─────────────────────────────
 
   // ── Construit les éléments depuis les données ─
   _build(elements) {
@@ -69,59 +122,6 @@ class Level {
     }
   }
 
-  // ── Met à jour les ennemis et les cerises ────
-  update(agents) {
-    const alive = agents.filter(a => !a.isDead);
-
-    // Mouvement + animation — une seule fois par frame
-    for (const enemy  of this.enemies)  enemy.updateMovement();
-    for (const cherry of this.cherries) cherry.updateAnimation();
-
-    // Collisions — pour chaque agent vivant
-    for (const agent of alive) {
-      for (const enemy  of this.enemies)  enemy._checkCollision(agent);
-      for (const cherry of this.cherries) cherry._checkCollision(agent);
-    }
-  }
-
-  // ── Rendu complet du niveau ──────────────────
-  draw() {
-    for (const g of this.grounds) {
-      this.tileMap.drawGround(g.x, g.y, g.width, g.height);
-    }
-
-    for (const p of this.platforms) {
-      p.draw();
-    }
-
-    for (const cherry of this.cherries) {
-      cherry.draw();
-    }
-
-    for (const enemy of this.enemies) {
-      enemy.draw();
-    }
-
-    if (this.finish) {
-      this._drawFinishFlag(this.finish.x, this.finish.y);
-    }
-  }
-
-
-  _drawFinishFlag(x, y) {
-    stroke(255, 50, 50);
-    strokeWeight(3);
-    line(x, y, x, y - 60);
-    noStroke();
-    fill(255, 50, 50);
-    triangle(x, y - 60, x + 30, y - 45, x, y - 30);
-  }
-
-  // ── Surfaces solides (depuis le cache) ───────
-  getSolidSurfaces() {
-    return this._surfaces;
-  }
-
   // ── Construit le cache des surfaces ──────────
   _buildSurfaces() {
     const grounds = this.grounds.map(g => ({
@@ -140,4 +140,23 @@ class Level {
 
     return { grounds, platforms, gaps };
   }
+
+
+  _drawFinishFlag(x, y) {
+    const POLE_HEIGHT = 60;
+    const FLAG_WIDTH  = 30;
+    const FLAG_TOP    = y - POLE_HEIGHT;
+    const FLAG_MIDDLE    = y - POLE_HEIGHT + 15;
+    const FLAG_BOTTOM    = y - POLE_HEIGHT + 30;
+
+    stroke(255, 50, 50);
+    strokeWeight(3);
+    line(x, y, x, FLAG_TOP);
+    noStroke();
+    fill(255, 50, 50);
+    triangle(x, FLAG_TOP, x + FLAG_WIDTH, FLAG_MIDDLE, x, FLAG_BOTTOM);
+  }
+
+
+  
 }

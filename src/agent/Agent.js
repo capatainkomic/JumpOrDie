@@ -66,16 +66,14 @@ class Agent {
     this.vy += Agent.GRAVITY;
     this.vy  = constrain(this.vy, -15, 15);
 
-    // 2. Calculer déplacement ce frame
+    // Calculer déplacement ce frame
     const dx = this.vx;
     const dy = this.vy;
 
-    // 3. Résoudre les collisions avec déplacement continu
-    //    On sépare X et Y pour éviter les coins
+    // Résoudre les collisions avec déplacement continu
     this._moveX(dx, surfaces);
     this._moveY(dy, surfaces);
 
-    // 4. Mort si tombe hors canvas
     // Mort si sort du canvas (bas ou gauche)
     if (this.y > CANVAS_H + 50 || this.x < this._startX - 50) {
       this.isDead = true;
@@ -260,7 +258,6 @@ class Agent {
     let minDist = Agent.PERCEPTION_RADIUS;
 
     for (const c of cherries) {
-      if (c.collected)   continue;
       const d = dist(this.x, this.y, c.x, c.y);
       if (d < minDist) { minDist = d; closest = c; }
     }

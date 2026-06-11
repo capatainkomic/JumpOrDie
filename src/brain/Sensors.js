@@ -2,7 +2,7 @@ class Sensors {
 
   // Distances des colonnes de la grille (en tiles)
   // Négatives = derrière l'agent (gauche), positives = devant (droite)
-  static GRID_COLS   = [-2, -1, 0, 1, 2, 4, 8]; // 6 colonnes
+  static GRID_COLS   = [-2, -1, 0, 1, 2, 4, 8]; // 7 colonnes
   static GRID_ROWS   = 3; // haut / milieu / bas
 
   // Hauteurs des lignes relatives au centre de l'agent
@@ -17,7 +17,7 @@ class Sensors {
   // Retourne un tableau de valeurs [0, 1]
   // Seuls les blocs activés dans gm.config.inputConfig
   // sont inclus — le tableau a exactement inputCount valeurs
-  static compute(agent, surfaces, enemies, cherries, inputCount) {
+  static compute(agent, surfaces, enemies, cherries) {
     const cfg    = gm.config.inputConfig;
     const inputs = [];
 

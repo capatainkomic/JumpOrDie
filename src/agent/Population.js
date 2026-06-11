@@ -41,9 +41,8 @@ class Population {
       const inputs = Sensors.compute(
         agent,
         surfaces,
-        level.cherries,
         level.enemies,
-        gm.config.inputCount
+        level.cherries,
       );
 
       agent.decide(inputs);

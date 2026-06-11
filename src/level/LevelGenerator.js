@@ -163,42 +163,7 @@ class LevelGenerator {
     return curT + groundT;
   }
 
-  // ── Opossum sur le sol ───────────────────────
-  _maybeAddOpossum(elements, curT, groundT, groundY, T, rules, px, occupiedTiles) {
-    if (random() >= rules.enemyFreq) return;
-
-    // Centre de la section
-    const tileOffset = Math.floor(groundT / 2);
-    if (occupiedTiles.has(tileOffset)) return;
-
-    occupiedTiles.add(tileOffset);
-
-    elements.push({
-      type        : 'opossum',
-      x           : px(curT + tileOffset),
-      y           : groundY - Opossum.SPRITE_H, // posé sur le top du sol
-      patrolLeft  : px(curT),
-      patrolRight : px(curT + groundT),
-    });
-  }
-
-  // ── Cherry sur le sol ────────────────────────
-  _maybeAddCherry(elements, curT, groundT, groundY, T, rules, px, randT, occupiedTiles) {
-    if (random() > rules.cherryFreq) return;
-    if (groundT < 2) return;
-
-    // Cherche une tile libre aléatoirement
-    const tileOffset = this._findFreeTile(curT, groundT, occupiedTiles, randT);
-    if (tileOffset === null) return;
-
-    occupiedTiles.add(tileOffset - curT);
-
-    elements.push({
-      type: 'cherry',
-      x   : px(tileOffset) + T / 2, // centré sur la tile
-      y   : groundY - T,
-    });
-  }
+  
 
   // Retourne un offset de tile libre dans [curT, curT+groundT[, ou null
   _findFreeTile(curT, groundT, occupiedTiles, randT) {
@@ -324,5 +289,42 @@ class LevelGenerator {
         y   : groundY - hT * T - T,
       });
     }
+  }
+
+  // ── Opossum sur le sol ───────────────────────
+  _maybeAddOpossum(elements, curT, groundT, groundY, T, rules, px, occupiedTiles) {
+    if (random() >= rules.enemyFreq) return;
+
+    // Centre de la section
+    const tileOffset = Math.floor(groundT / 2);
+    if (occupiedTiles.has(tileOffset)) return;
+
+    occupiedTiles.add(tileOffset);
+
+    elements.push({
+      type        : 'opossum',
+      x           : px(curT + tileOffset),
+      y           : groundY - Opossum.SPRITE_H, // posé sur le top du sol
+      patrolLeft  : px(curT),
+      patrolRight : px(curT + groundT),
+    });
+  }
+
+  // ── Cherry sur le sol ────────────────────────
+  _maybeAddCherry(elements, curT, groundT, groundY, T, rules, px, randT, occupiedTiles) {
+    if (random() > rules.cherryFreq) return;
+    if (groundT < 2) return;
+
+    // Cherche une tile libre aléatoirement
+    const tileOffset = this._findFreeTile(curT, groundT, occupiedTiles, randT);
+    if (tileOffset === null) return;
+
+    occupiedTiles.add(tileOffset - curT);
+
+    elements.push({
+      type: 'cherry',
+      x   : px(tileOffset) + T / 2, // centré sur la tile
+      y   : groundY - T,
+    });
   }
 }

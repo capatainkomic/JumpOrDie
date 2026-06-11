@@ -49,7 +49,7 @@ class GeneticAlgorithm {
     return newBrains;
   }
 
-  // ── Sélection par tournoi ────────────────────
+  // ── Sélection par roulette ────────────────────
   static _selectParent(sortedAgents) {
     // Sélection par roulette biaisée vers le haut
     // Plus le rang est élevé, plus la probabilité est grande

@@ -102,7 +102,6 @@ class CompetitionManager {
         surfaces,
         this.level.enemies,
         this.level.cherries,
-        agent.brain.inputCount
       );
 
       agent.decide(inputs);
